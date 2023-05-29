@@ -1,6 +1,5 @@
 import React from "react";
 import { Nunito } from "next/font/google";
-import { useToasts } from "react-toast-notifications";
 import { URLData, URLDataResponse } from "@/src/interfaces";
 import { GitHubLink } from "@/src/components/GitHubLink";
 
@@ -15,17 +14,16 @@ export default function Home() {
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const { addToast } = useToasts();
 
-  React.useEffect(() => {
-    if (errorMessage) {
-      const content = <div className="error-message">{errorMessage}</div>;
-      addToast(content, {
-        appearance: "error",
-        autoDismiss: true,
-      });
-    }
-  }, [errorMessage, addToast]);
+  // React.useEffect(() => {
+  //   if (errorMessage) {
+  //     const content = <div className="error-message">{errorMessage}</div>;
+  //     addToast(content, {
+  //       appearance: "error",
+  //       autoDismiss: true,
+  //     });
+  //   }
+  // }, [errorMessage]);
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -48,6 +46,7 @@ export default function Home() {
 
     if (result?.error) {
       setErrorMessage(result.error.message);
+      console.error('Creating Short URL Error:', errorMessage);
       setLoading(false);
     } else if (data) {
       const newUrlData: URLData = {

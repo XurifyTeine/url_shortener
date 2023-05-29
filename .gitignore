@@ -34,3 +34,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 firebase-debug.log
+.firebaserc
+.gitignore
+.firebase/hosting.*
+.gitignore
+firebase.json
+.github/workflows/*
+.firebase/

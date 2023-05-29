@@ -25,7 +25,7 @@ export default function Home() {
         autoDismiss: true,
       });
     }
-  }, [errorMessage]);
+  }, [errorMessage, addToast]);
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>

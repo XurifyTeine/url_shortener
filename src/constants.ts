@@ -1,0 +1,1 @@
+export const BASE_URL = process.env.NODE_ENV === "production" ? process.env.GO_SERVER_URL : "http://192.168.0.229:8080"

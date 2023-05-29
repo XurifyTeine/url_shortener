@@ -3,6 +3,7 @@ import { Nunito } from "next/font/google";
 import Link from "next/link";
 import { URLError, URLDataResponse } from "@/src/interfaces";
 import { getIdFromPathname } from "@/src/utils";
+import { GitHubLink } from "@/src/components/GitHubLink";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -10,7 +11,7 @@ const inter = Nunito({
   fallback: ["ui-sans-serif"],
 });
 
-export default function Home() {
+export default function RedirectPage() {
   const [errorMessage, setErrorMessage] = React.useState<URLError | null>(null);
 
   React.useEffect(() => {
@@ -18,7 +19,7 @@ export default function Home() {
     if (!id) return;
 
     (async () => {
-      const response = await fetch(`/api/urls/${id}`, {
+      const response = await fetch(`/api/urls/LjjdON`, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -27,8 +28,11 @@ export default function Home() {
       });
       const result = await response.json();
       const data: URLDataResponse = result.data;
+      console.log(data)
       if (data.error) {
         setErrorMessage(data.error);
+      } else if (data.result?.destination) {
+        window.location.replace(data.result.destination)
       }
     })();
   }, []);
@@ -46,6 +50,7 @@ export default function Home() {
       <Link href="/" className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200">
         <span>Back to Home</span>
       </Link>
+      <GitHubLink />
     </main>
   );
 }

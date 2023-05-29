@@ -2,6 +2,7 @@ import React from "react";
 import { Nunito } from "next/font/google";
 import { useToasts } from "react-toast-notifications";
 import { URLData, URLDataResponse } from "@/src/interfaces";
+import { GitHubLink } from "@/src/components/GitHubLink";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -125,6 +126,7 @@ export default function Home() {
           to share.
         </p>
       </div>
+      <GitHubLink />
     </main>
   );
 }

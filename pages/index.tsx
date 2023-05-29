@@ -1,7 +1,7 @@
 import React from "react";
-import { URLData, URLDataResponse } from "@/src/interfaces";
 import { Nunito } from "next/font/google";
 import { useToasts } from "react-toast-notifications";
+import { URLData, URLDataResponse } from "@/src/interfaces";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -15,16 +15,6 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const { addToast } = useToasts();
-
-  React.useEffect(() => {
-    const mockData = {
-      date_created: "2023-05-29T10:28:54-04:00",
-      destination: "https://gobyexample.com/environment-variables",
-      id: "bFksmERCHP",
-      url: `${window.location.origin}/bFksmERCHP`,
-    };
-    setUrlData(mockData);
-  }, []);
 
   React.useEffect(() => {
     if (errorMessage) {
@@ -75,10 +65,6 @@ export default function Home() {
   ) => {
     const value = e.target.value;
     setDestinationUrl(value);
-  };
-
-  const handleTestError = () => {
-    setErrorMessage("This is an error");
   };
 
   return (

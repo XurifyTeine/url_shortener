@@ -1,6 +1,7 @@
-import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { ToastProvider } from 'react-toast-notifications';
+import { ToastProvider } from "react-toast-notifications";
+import { GitHubLink } from "@/src/components/GitHubLink";
+import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -10,6 +11,7 @@ export default function App({ Component, pageProps }: AppProps) {
       placement="top-right"
     >
       <Component {...pageProps} />
+      <GitHubLink />
     </ToastProvider>
   );
 }

@@ -1,6 +1,7 @@
 import React from "react";
-import { URLError, URLDataResponse } from "@/src/interfaces";
 import { Nunito } from "next/font/google";
+import Link from "next/link";
+import { URLError, URLDataResponse } from "@/src/interfaces";
 import { getIdFromPathname } from "@/src/utils";
 
 const inter = Nunito({
@@ -29,13 +30,12 @@ export default function Home() {
       if (data.error) {
         setErrorMessage(data.error);
       }
-      console.log(data);
     })();
   }, []);
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 justify-center"
+      className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 justify-center text-center"
       style={inter.style}
     >
       <h1 className="font-bold text-8xl">404</h1>
@@ -43,6 +43,9 @@ export default function Home() {
         Sorry, it looks like this link is broken 😥
       </h2>
       {errorMessage && <span>{errorMessage.message}</span>}
+      <Link href="/" className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200">
+        <span>Back to Home</span>
+      </Link>
     </main>
   );
 }

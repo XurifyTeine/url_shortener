@@ -17,7 +17,6 @@ type Data = {
 
 const handleFetch = async (destination: string) => {
   const url = `${BASE_URL}/create-short-url?url=${destination}`;
-  console.log(BASE_URL, url, "BASE_URL");
   const res = await fetch(url, {
     headers: {
       Accept: "application/json",

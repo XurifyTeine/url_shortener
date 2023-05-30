@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       error: data.error,
       url,
     };
-    console.error("MIDDLEWARE ERROR:", error);
+    console.error("MIDDLEWARE ERROR:", data);
   }
 
   if (data && data.result && data.result.destination) {

@@ -46,7 +46,7 @@ export default function Home() {
 
     if (result?.error) {
       setErrorMessage(result.error.message);
-      console.error('Creating Short URL Error:', errorMessage);
+      console.error('Creating Short URL Error:', result.error, data);
       setIsLoading(false);
     } else if (data) {
       const newUrlData: URLData = {

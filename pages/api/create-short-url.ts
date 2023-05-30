@@ -33,11 +33,7 @@ export const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) => {
-  if (req.method !== "POST") {
-    res.status(405).send({ message: "Only POST requests allowed" });
-    return;
-  }
-
+  console.log('TEST3', req.method);
   const destination = req.query["url"] as string | undefined;
 
   if (destination) {

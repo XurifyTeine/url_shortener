@@ -22,10 +22,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   if (data.error) {
     const error = {
+      data,
       error: data.error,
       url,
     };
-    console.error("MIDDLEWARE ERROR:", data);
+    console.error("MIDDLEWARE ERROR:", error);
   }
 
   if (data && data.result && data.result.destination) {

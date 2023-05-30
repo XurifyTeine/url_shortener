@@ -14,6 +14,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   const shortId = getIdFromPathname(request.nextUrl.pathname);
+
+  if (!shortId) {
+    return NextResponse.next();
+  }
+
   const url = `${BASE_URL}/urls/${shortId}`;
 
   const response = await fetch(url);

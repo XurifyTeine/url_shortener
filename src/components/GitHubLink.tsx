@@ -15,3 +15,5 @@ export const GitHubLink: React.FC = () => {
     </a>
   );
 };
+
+export default GitHubLink;

@@ -27,6 +27,7 @@ export const handler = async (
     const urlData = await handleFetch(urlId);
     if (urlData?.result) {
       res.status(200).json({ result: urlData.result });
+      return;
     }
   }
   

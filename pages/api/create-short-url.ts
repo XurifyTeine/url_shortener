@@ -40,6 +40,7 @@ export const handler = async (
     const urlData = await handleFetch(destination);
     if (urlData?.result) {
       res.status(200).json({ result: urlData.result });
+      return;
     }
   }
 

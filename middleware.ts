@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { URLData, URLDataResponse } from "./src/interfaces";
+import { URLDataResponse } from "./src/interfaces";
 import { BASE_URL } from "./src/constants";
 import { getIdFromPathname } from "./src/utils";
 

@@ -5,7 +5,7 @@ import { BASE_URL } from "./src/constants";
 import { getIdFromPathname } from "./src/utils";
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  const routesToExclude = ["/favicon.ico", "/"];
+  const routesToExclude = ["/favicon.ico", "/", "/api"];
   if (
     request.nextUrl.pathname.match("_next/|((?<!.)([^.])+/api)") ||
     routesToExclude.includes(request.nextUrl.pathname)

@@ -13,7 +13,7 @@ export default function Home() {
   const [urlData, setUrlData] = React.useState<URLData | null>(null);
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // React.useEffect(() => {
   //   if (errorMessage) {
@@ -29,7 +29,8 @@ export default function Home() {
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
-    if (loading) return;
+    if (isLoading) return;
+    setIsLoading(true);
     const response = await fetch(
       `/api/create-short-url?url=${destinationUrl}`,
       {
@@ -40,14 +41,13 @@ export default function Home() {
         method: "POST",
       }
     );
-    setLoading(true);
     const result: URLDataResponse = await response.json();
     const data = result?.result as URLData;
 
     if (result?.error) {
       setErrorMessage(result.error.message);
       console.error('Creating Short URL Error:', errorMessage);
-      setLoading(false);
+      setIsLoading(false);
     } else if (data) {
       const newUrlData: URLData = {
         date_created: data.date_created,
@@ -56,7 +56,7 @@ export default function Home() {
         url: `${window.location.origin}/${data.id}`,
       };
       setUrlData(newUrlData);
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -94,8 +94,9 @@ export default function Home() {
             <button
               className="text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 duration-200"
               onClick={handleCreateShortURL}
+              disabled={isLoading}
             >
-              Shorten URL
+              {isLoading ? "Loading..." : "Shorten URL"}
             </button>
           </span>
         </form>

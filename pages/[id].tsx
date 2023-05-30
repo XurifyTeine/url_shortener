@@ -28,7 +28,6 @@ export default function RedirectPage() {
       });
       const result = await response.json();
       const data: URLDataResponse = result.data;
-      console.log(data)
       if (data.error) {
         setErrorMessage(data.error);
       } else if (data.result?.destination) {

@@ -1,21 +1,22 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { BASE_URL } from "@/src/constants";
+import { URLDataResponse } from "@/src/interfaces";
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 
 interface URLData {
   destination: string;
-  short_url_id: string;
+  id: string;
   date_created: string;
 }
 
-type Data = {
-  data?: URLData;
+export type Data = {
+  result?: URLData;
   message?: string;
   error?: string;
 };
 
-const handleFetch = async (destination: string) => {
+const handleFetch = async (destination: string): Promise<URLDataResponse> => {
   const url = `${BASE_URL}/create-short-url?url=${destination}`;
   const res = await fetch(url, {
     headers: {
@@ -41,7 +42,9 @@ export const handler = async (
 
   if (destination) {
     const urlData = await handleFetch(destination);
-    res.status(200).json({ data: urlData });
+    if (urlData?.result) {
+      res.status(200).json({ result: urlData.result });
+    }
   }
 
   res.status(404).send({

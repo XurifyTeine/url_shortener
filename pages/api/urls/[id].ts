@@ -1,14 +1,10 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { BASE_URL } from '@/src/constants';
-import { URLData } from '@/src/interfaces';
+import { URLData, URLDataResponse } from '@/src/interfaces';
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { Data } from '../create-short-url';
 
-type Data = {
-  data?: URLData;
-  error?: string;
-}
-
-const handleFetch = async (urlId: string) => {
+const handleFetch = async (urlId: string): Promise<URLDataResponse> => {
   const url = `${BASE_URL}/urls/${urlId}`;
   const res = await fetch(url, {
     headers: {
@@ -29,7 +25,9 @@ export const handler = async (
 
   if (urlId) {
     const urlData = await handleFetch(urlId);
-    res.status(200).json({ data: urlData });
+    if (urlData?.result) {
+      res.status(200).json({ result: urlData.result });
+    }
   }
   
   res.status(404).send({ error: "This URL is invalid or a destination URL could not be found" })

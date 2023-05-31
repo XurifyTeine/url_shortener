@@ -1,7 +1,6 @@
 import React from "react";
 import { Nunito } from "next/font/google";
 import Link from "next/link";
-import { URLError, URLDataResponse } from "@/src/interfaces";
 import { getIdFromPathname } from "@/src/utils";
 import { URLDataNextAPI } from "./api/create-short-url";
 

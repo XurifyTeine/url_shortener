@@ -1,7 +1,7 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { BASE_URL } from '@/src/constants';
-import { URLData, URLDataResponse } from '@/src/interfaces';
 import type { NextApiRequest, NextApiResponse } from 'next'
+
+import { BASE_URL } from '@/src/constants';
+import { URLDataResponse } from '@/src/interfaces';
 import { URLDataNextAPI } from '../create-short-url';
 
 const handleFetch = async (urlId: string): Promise<URLDataResponse> => {

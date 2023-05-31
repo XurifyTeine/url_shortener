@@ -1,7 +1,7 @@
 import React from "react";
 import { Nunito } from "next/font/google";
 
-import { URLData, URLDataResponse } from "@/src/interfaces";
+import { URLData } from "@/src/interfaces";
 import LoadingIcon from "@/src/components/LoadingIcon";
 import { useToast } from "@/src/context/ToastContext";
 import { URLDataNextAPI } from "./api/create-short-url";

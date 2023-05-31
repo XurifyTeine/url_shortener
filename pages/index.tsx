@@ -1,7 +1,9 @@
 import React from "react";
 import { Nunito } from "next/font/google";
+
 import { URLData, URLDataResponse } from "@/src/interfaces";
-import { GitHubLink } from "@/src/components/GitHubLink";
+import LoadingIcon from "@/src/components/LoadingIcon";
+import { useToast } from "@/src/context/ToastContext";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -12,23 +14,17 @@ const inter = Nunito({
 export default function Home() {
   const [urlData, setUrlData] = React.useState<URLData | null>(null);
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
-
-  // React.useEffect(() => {
-  //   if (errorMessage) {
-  //     const content = <div className="error-message">{errorMessage}</div>;
-  //     addToast(content, {
-  //       appearance: "error",
-  //       autoDismiss: true,
-  //     });
-  //   }
-  // }, [errorMessage]);
+  const { state: toastState, dispatchToast } = useToast();
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
+    if (destinationUrl.trim() === "") {
+      dispatchToast("An incorrect URL was provided", "danger");
+      return;
+    }
     if (isLoading) return;
     setIsLoading(true);
     const response = await fetch(
@@ -45,8 +41,8 @@ export default function Home() {
     const data = result?.result as URLData;
 
     if (result?.error) {
-      setErrorMessage(result.error.message);
-      console.error('Creating Short URL Error:', result.error, data);
+      dispatchToast(result.error.message, "danger");
+      console.error("Creating Short URL Error:", result.error);
       setIsLoading(false);
     } else if (data) {
       const newUrlData: URLData = {
@@ -92,10 +88,11 @@ export default function Home() {
               placeholder="Paste a link here"
             />
             <button
-              className="text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 duration-200"
+              className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
               onClick={handleCreateShortURL}
               disabled={isLoading}
             >
+              {isLoading && <LoadingIcon />}{" "}
               {isLoading ? "Loading..." : "Shorten URL"}
             </button>
           </span>
@@ -105,7 +102,7 @@ export default function Home() {
             <span>
               <span className="mr-1.5">Click to visit:</span>
               <a
-                className="text-brand-neon-green-100"
+                className="text-brand-neon-green-100 break-all font-semibold"
                 href={`/${urlData.url}`}
                 target="_blank"
               >
@@ -113,8 +110,14 @@ export default function Home() {
               </a>
             </span>
             <span>
-              <span className="mr-1.5 font-medium">Destination:</span>
-              <span className="mb-1.5">{urlData.destination}</span>
+              <span className="mr-1.5">Destination:</span>
+              <a
+                className="mb-1.5 break-all"
+                href={urlData.destination}
+                target="_blank"
+              >
+                {urlData.destination}
+              </a>
             </span>
           </div>
         )}
@@ -126,7 +129,6 @@ export default function Home() {
           to share.
         </p>
       </div>
-      <GitHubLink />
     </main>
   );
 }

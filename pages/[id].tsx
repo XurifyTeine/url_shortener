@@ -3,7 +3,6 @@ import { Nunito } from "next/font/google";
 import Link from "next/link";
 import { URLError, URLDataResponse } from "@/src/interfaces";
 import { getIdFromPathname } from "@/src/utils";
-import { GitHubLink } from "@/src/components/GitHubLink";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -49,7 +48,6 @@ export default function RedirectPage() {
       <Link href="/" className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200">
         <span>Back to Home</span>
       </Link>
-      <GitHubLink />
     </main>
   );
 }

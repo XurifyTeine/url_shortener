@@ -33,16 +33,19 @@ export const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) => {
-  console.log('TEST3', req.method);
   const destination = req.query["url"] as string | undefined;
 
   if (destination) {
-    const urlData = await handleFetch(destination);
-    if (urlData?.result) {
-      res.status(200).json({ result: urlData.result });
+    const result = await handleFetch(destination);
+    if (result?.error && result.error.errorCode) {
+      res.status(result.error.errorCode ?? 404).json({ error: result.error?.message });
+      return;
+    } else if (result?.result) {
+      res.status(200).json({ result: result.result })
       return;
     }
   }
+
 
   res.status(404).send({
     error:

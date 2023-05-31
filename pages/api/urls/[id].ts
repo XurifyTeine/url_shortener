@@ -24,9 +24,11 @@ export const handler = async (
   const urlId = req.query["id"] as string | undefined;
 
   if (urlId) {
-    const urlData = await handleFetch(urlId);
-    if (urlData?.result) {
-      res.status(200).json({ result: urlData.result });
+    const result = await handleFetch(urlId);
+    if (result?.error && result.error.errorCode) {
+      res.status(result.error.errorCode ?? 404).json({ error: result.error?.message });
+    } else if (result?.result) {
+      res.status(200).json({ result: result.result })
       return;
     }
   }

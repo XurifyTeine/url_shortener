@@ -8,6 +8,7 @@ export interface URLData {
 export interface URLError {
   error: string;
   message: string;
+  errorCode: number;
 }
 
 export type URLDataResponse = {

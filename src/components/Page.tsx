@@ -15,6 +15,7 @@ export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
         <ToastNotification
           message={toastState.message}
           type={toastState.type}
+          duration={toastState.duration}
         />
       )}
     </>

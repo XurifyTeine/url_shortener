@@ -7,8 +7,8 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({
 }) => {
   const [state, setState] = React.useState<ToastNotificationProps | null>(null);
 
-  const handleSetState = (message: string, type: ToastNotificationType) => {
-    setState({ message, type });
+  const handleSetState = (message: string, type: ToastNotificationType, duration = 5000) => {
+    setState({ message, type, duration });
   };
 
   const handleDismissToast = () => setState(null);

@@ -10,16 +10,28 @@ export type ToastNotificationType =
 export interface ToastNotificationProps {
   message: string;
   type: ToastNotificationType;
+  duration: number;
 }
 
 export const ToastNotification: React.FC<ToastNotificationProps> = ({
   message,
   type,
+  duration = 5000,
 }) => {
-  const defaultClassName = "animate-slide-in absolute top-2 right-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow";
+  const defaultClassName =
+    "animate-slide-in absolute top-2 right-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow";
   const [className, setClassName] = React.useState(defaultClassName);
   const { dismissToast } = useToast();
   const id = `toast-${type}`;
+
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleDismissToast(duration, true);
+    }, duration);
+
+    return () => clearTimeout(timeout);
+  }, [duration]);
+
   const icon =
     type === "success" ? (
       <SuccessIcon />
@@ -31,19 +43,15 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
       <DefaultIcon />
     );
 
-  const handleDismissToast = () => {
+  const handleDismissToast = (duration: number, skipTimeout?: boolean) => {
+    setClassName(`${defaultClassName} animate-slide-out`);
     setTimeout(() => {
       dismissToast();
     }, 400);
-    setClassName(`${defaultClassName} animate-slide-out`)
   };
 
   return (
-    <div
-      id={id}
-      className={className}
-      role="alert"
-    >
+    <div id={id} className={className} role="alert">
       {icon}
       <div className="ml-3 text-sm font-normal">{message}</div>
       <button
@@ -51,7 +59,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
         className="ml-auto -mx-1.5 -my-1.5 ml-1 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8"
         data-dismiss-target={`#${id}`}
         aria-label="Close"
-        onClick={handleDismissToast}
+        onClick={() => handleDismissToast(400)}
       >
         <span className="sr-only">Close</span>
         <svg

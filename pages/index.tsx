@@ -15,7 +15,7 @@ export default function Home() {
   const [urlData, setUrlData] = React.useState<URLData | null>(null);
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState(false);
-  const { state: toastState, dispatchToast } = useToast();
+  const { dispatchToast } = useToast();
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>

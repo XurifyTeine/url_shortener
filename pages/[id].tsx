@@ -3,6 +3,7 @@ import { Nunito } from "next/font/google";
 import Link from "next/link";
 import { URLError, URLDataResponse } from "@/src/interfaces";
 import { getIdFromPathname } from "@/src/utils";
+import { URLDataNextAPI } from "./api/create-short-url";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -11,7 +12,7 @@ const inter = Nunito({
 });
 
 export default function RedirectPage() {
-  const [errorMessage, setErrorMessage] = React.useState<URLError | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const id = getIdFromPathname(window.location.pathname);
@@ -25,12 +26,11 @@ export default function RedirectPage() {
         },
         method: "GET",
       });
-      const result = await response.json();
-      const data: URLDataResponse = result.data;
-      if (data.error) {
-        setErrorMessage(data.error);
-      } else if (data.result?.destination) {
-        window.location.replace(data.result.destination)
+      const result: URLDataNextAPI = await response.json();
+      if (result?.error) {
+        setErrorMessage(result.error);
+      } else if (result.result?.destination) {
+        window.location.replace(result.result.destination)
       }
     })();
   }, []);
@@ -44,7 +44,7 @@ export default function RedirectPage() {
       <h2 className="font-light text-3xl">
         Sorry, it looks like this link is broken 😥
       </h2>
-      {errorMessage && <span>{errorMessage.message}</span>}
+      {errorMessage && <span>{errorMessage}</span>}
       <Link href="/" className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200">
         <span>Back to Home</span>
       </Link>

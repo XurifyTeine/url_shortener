@@ -2,7 +2,6 @@
 import { BASE_URL } from "@/src/constants";
 import { URLDataResponse } from "@/src/interfaces";
 import type { NextApiRequest, NextApiResponse } from "next";
-import NextCors from "nextjs-cors";
 
 interface URLData {
   destination: string;
@@ -10,7 +9,7 @@ interface URLData {
   date_created: string;
 }
 
-export type Data = {
+export type URLDataNextAPI = {
   result?: URLData;
   message?: string;
   error?: string;
@@ -31,7 +30,7 @@ const handleFetch = async (destination: string): Promise<URLDataResponse> => {
 
 export const handler = async (
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<URLDataNextAPI>
 ) => {
   const destination = req.query["url"] as string | undefined;
 

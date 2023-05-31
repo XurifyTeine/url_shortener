@@ -4,6 +4,7 @@ import { Nunito } from "next/font/google";
 import { URLData, URLDataResponse } from "@/src/interfaces";
 import LoadingIcon from "@/src/components/LoadingIcon";
 import { useToast } from "@/src/context/ToastContext";
+import { URLDataNextAPI } from "./api/create-short-url";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -37,11 +38,11 @@ export default function Home() {
         method: "POST",
       }
     );
-    const result: URLDataResponse = await response.json();
+    const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;
 
     if (result?.error) {
-      dispatchToast(result.error.message, "danger");
+      dispatchToast(result.error, "danger");
       console.error("Creating Short URL Error:", result.error);
       setIsLoading(false);
     } else if (data) {

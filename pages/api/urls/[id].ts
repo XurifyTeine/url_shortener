@@ -2,7 +2,7 @@
 import { BASE_URL } from '@/src/constants';
 import { URLData, URLDataResponse } from '@/src/interfaces';
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { Data } from '../create-short-url';
+import { URLDataNextAPI } from '../create-short-url';
 
 const handleFetch = async (urlId: string): Promise<URLDataResponse> => {
   const url = `${BASE_URL}/urls/${urlId}`;
@@ -19,7 +19,7 @@ const handleFetch = async (urlId: string): Promise<URLDataResponse> => {
 
 export const handler = async (
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<URLDataNextAPI>
 ) => {
   const urlId = req.query["id"] as string | undefined;
 

@@ -3,7 +3,7 @@ import { ToastNotificationProps, ToastNotificationType } from "../components/Toa
 
 export interface ToastContextInterface {
   state: ToastNotificationProps | null;
-  dispatchToast: ((message: string, type: ToastNotificationType) => void) | (() => void);
+  dispatchToast: ((message: string, type: ToastNotificationType, duration?: number) => void) | (() => void);
   dismissToast: () => void;
 }
 

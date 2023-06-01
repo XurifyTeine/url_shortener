@@ -5,6 +5,7 @@ import { URLData } from "@/src/interfaces";
 import LoadingIcon from "@/src/components/LoadingIcon";
 import { useToast } from "@/src/context/ToastContext";
 import { URLDataNextAPI } from "./api/create-short-url";
+import { useCopyToClipboard } from "@/src/hooks";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -17,13 +18,14 @@ export default function Home() {
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState(false);
   const { dispatchToast } = useToast();
+  const [_value, copy] = useCopyToClipboard();
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
     if (destinationUrl.trim() === "") {
-      dispatchToast("An incorrect URL was provided", "danger");
+      dispatchToast("An incorrect URL was provided", "danger", 7000);
       return;
     }
     if (isLoading) return;
@@ -42,7 +44,7 @@ export default function Home() {
     const data = result?.result as URLData;
 
     if (result?.error) {
-      dispatchToast(result.error, "danger");
+      dispatchToast(result.error, "danger", 7000);
       console.error("Creating Short URL Error:", result.error);
       setIsLoading(false);
     } else if (data) {
@@ -64,6 +66,13 @@ export default function Home() {
     setDestinationUrl(value);
   };
 
+  const handleCopyUrl = () => {
+    if (urlData?.url) {
+      dispatchToast("Copied to clipboard", "copy");
+      copy(urlData?.url);
+    }
+  };
+
   return (
     <main
       className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 pt-32"
@@ -81,13 +90,15 @@ export default function Home() {
             Shorten a long URL
           </label>
           <span className="flex flex-wrap md:flex-nowrap rounded-sm overflow-hidden block w-full">
-            <input
-              className="h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
-              value={destinationUrl}
-              onChange={handleOnChangeDestinationUrl}
-              id="url"
-              placeholder="Paste a link here"
-            />
+            <div className="w-full relative">
+              <input
+                className="h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
+                value={destinationUrl}
+                onChange={handleOnChangeDestinationUrl}
+                id="url"
+                placeholder="Paste a link here"
+              />
+            </div>
             <button
               className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
               onClick={handleCreateShortURL}
@@ -99,27 +110,34 @@ export default function Home() {
           </span>
         </form>
         {urlData && typeof window !== "undefined" && (
-          <div className="result-box flex flex-col bg-brand-grayish-green-100 rounded-sm mt-2 p-2">
-            <span>
-              <span className="mr-1.5">Click to visit:</span>
-              <a
-                className="text-brand-neon-green-100 break-all font-semibold"
-                href={`/${urlData.url}`}
-                target="_blank"
-              >
-                {urlData.url}
-              </a>
-            </span>
-            <span>
-              <span className="mr-1.5">Destination:</span>
-              <a
-                className="mb-1.5 break-all"
-                href={urlData.destination}
-                target="_blank"
-              >
-                {urlData.destination}
-              </a>
-            </span>
+          <div className="result-box flex bg-brand-grayish-green-100 rounded-sm mt-2 p-2">
+            <div className="flex flex-col">
+              <span>
+                <span className="mr-1.5">Click to visit:</span>
+                <a
+                  className="text-brand-neon-green-100 break-all font-semibold"
+                  href={urlData.url}
+                  target="_blank"
+                >
+                  {urlData.url}
+                </a>
+              </span>
+              <span>
+                <span className="mr-1.5">Destination:</span>
+                <a
+                  className="mb-1.5 break-all"
+                  href={urlData.destination}
+                  target="_blank"
+                >
+                  {urlData.destination}
+                </a>
+              </span>
+            </div>
+            <div className="flex w-16 min-w-[4rem] max-w-[4rem] items-center justify-center">
+              <button onClick={handleCopyUrl}>
+                <ClipboardIcon />
+              </button>
+            </div>
           </div>
         )}
         <p className="mt-2 text-brand-dark-green-100">
@@ -133,3 +151,16 @@ export default function Home() {
     </main>
   );
 }
+
+const ClipboardIcon = () => (
+  <svg
+    className="w-6 h-6"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M6 4V8H18V4H20.0066C20.5552 4 21 4.44495 21 4.9934V21.0066C21 21.5552 20.5551 22 20.0066 22H3.9934C3.44476 22 3 21.5551 3 21.0066V4.9934C3 4.44476 3.44495 4 3.9934 4H6ZM8 2H16V6H8V2Z"
+      fill="rgba(252,249,249,1)"
+    ></path>
+  </svg>
+);

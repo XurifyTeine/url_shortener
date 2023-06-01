@@ -3,12 +3,21 @@ import React from "react";
 import GitHubLink from "@/src/components/GitHubLink";
 import ToastNotification from "@/src/components/ToastNotification";
 import { useToast } from "@/src/context/ToastContext";
+import { BASE_URL } from "../constants";
+import ErrorBoundary from "./ErrorBoundary";
 
 export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { state: toastState, dispatchToast } = useToast();
+
+  React.useEffect(() => {
+    fetch(`${BASE_URL}/healthz`)
+  }, []);
+
+  const { state: toastState } = useToast();
   return (
     <>
-      {children}
+      <ErrorBoundary>
+        {children}
+      </ErrorBoundary>
       <GitHubLink />
       {toastState && (
         <ToastNotification

@@ -5,7 +5,8 @@ export type ToastNotificationType =
   | "default"
   | "success"
   | "danger"
-  | "warning";
+  | "warning"
+  | "copy";
 
 export interface ToastNotificationProps {
   message: string;
@@ -39,6 +40,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
       <DangerIcon />
     ) : type === "warning" ? (
       <WarningIcon />
+    ) : type === "copy" ? (
+      <ClipboardIcon />
     ) : (
       <DefaultIcon />
     );
@@ -56,7 +59,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
       <div className="ml-3 text-sm font-normal">{message}</div>
       <button
         type="button"
-        className="ml-auto -mx-1.5 -my-1.5 ml-1 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8"
+        className="ml-auto -mx-1.5 -my-1.5 ml-2 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8"
         data-dismiss-target={`#${id}`}
         aria-label="Close"
         onClick={() => handleDismissToast(400)}
@@ -80,8 +83,28 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
   );
 };
 
+const ClipboardIcon: () => React.JSX.Element = () => (
+  <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="#ffffff"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+    </svg>
+    <span className="sr-only">Fire icon</span>
+  </div>
+);
+
 const DefaultIcon: () => React.JSX.Element = () => (
-  <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-blue-500 bg-blue-100 rounded-lg dark:bg-blue-800 dark:text-blue-200">
+  <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-blue-500 bg-blue-100 rounded-lg">
     <svg
       aria-hidden="true"
       className="w-5 h-5"

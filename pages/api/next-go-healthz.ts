@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<any>
+  res: NextApiResponse<string>
 ) {
   const goServerResp = await fetch(`${BASE_URL}/healthz`, {
     headers: {

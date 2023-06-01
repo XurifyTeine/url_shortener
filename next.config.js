@@ -33,7 +33,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self'; connect-src 'https://*'"
+            value: "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
           },
           {
             key: 'Referrer-Policy',

@@ -33,7 +33,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'none'; script-src 'self'"
+            value: "default-src 'self'; script-src 'self'"
           },
           {
             key: 'Referrer-Policy',

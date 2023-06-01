@@ -3,6 +3,7 @@ import React from "react";
 export const GitHubLink: React.FC = () => {
   return (
     <a
+      aria-label="Click to view the GitHub repo"
       className="w-10 h-10 absolute bottom-2 right-2"
       href="https://github.com/XurifyTeine/url_shortener_frontend"
     >

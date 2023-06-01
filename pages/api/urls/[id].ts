@@ -13,7 +13,7 @@ const handleFetch = async (urlId: string): Promise<URLDataResponse> => {
     },
     method: "GET",
   });
-  const data = await res.json();
+  const data: URLDataResponse = await res.json();
   return data;
 };
 

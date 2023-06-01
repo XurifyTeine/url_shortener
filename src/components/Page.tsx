@@ -9,9 +9,11 @@ import ErrorBoundary from "./ErrorBoundary";
 export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   React.useEffect(() => {
-    console.log(`${BASE_URL}/healthz`, 'TEST')
-    fetch(`${BASE_URL}/healthz`)
-  }, []);
+    console.log('BASE_URL', BASE_URL);
+    if (BASE_URL) {
+      fetch(`${BASE_URL}/healthz`)
+    }
+  }, [BASE_URL]);
 
   const { state: toastState } = useToast();
   return (

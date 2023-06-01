@@ -24,7 +24,7 @@ const handleFetch = async (destination: string): Promise<URLDataResponse> => {
     },
     method: "POST",
   });
-  const data = await res.json();
+  const data: URLDataResponse = await res.json();
   return data;
 };
 

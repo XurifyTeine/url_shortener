@@ -9,6 +9,7 @@ import ErrorBoundary from "./ErrorBoundary";
 export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
 
   React.useEffect(() => {
+    console.log(`${BASE_URL}/healthz`, 'TEST')
     fetch(`${BASE_URL}/healthz`)
   }, []);
 

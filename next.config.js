@@ -32,8 +32,16 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
+            key: 'Content-Security-Policy',
+            value: "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
+          },
+          {
             key: 'Referrer-Policy',
             value: 'same-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'clipboard-read=self,clipboard-write=self,web-share=self,cross-origin-isolated=self',
           },
         ]
       }

@@ -11,14 +11,7 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
+
         ]
       }
     ]

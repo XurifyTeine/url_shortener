@@ -6,6 +6,7 @@ import LoadingIcon from "@/src/components/LoadingIcon";
 import { useToast } from "@/src/context/ToastContext";
 import { URLDataNextAPI } from "./api/create-short-url";
 import { useCopyToClipboard } from "@/src/hooks";
+import ErrorBoundary from "@/src/components/ErrorBoundary";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -14,7 +15,7 @@ const inter = Nunito({
 });
 
 export default function Home() {
-  const [urlData, setUrlData] = React.useState<URLData | null>(null);
+  const [urlData, setUrlData] = React.useState<URLData[]>([]);
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState(false);
   const { dispatchToast } = useToast();
@@ -26,6 +27,13 @@ export default function Home() {
     e.preventDefault();
     if (destinationUrl.trim() === "") {
       dispatchToast("An incorrect URL was provided", "danger", 7000);
+      return;
+    }
+    const alreadyCreated = urlData.filter(
+      (urlItem) => urlItem.destination === destinationUrl
+    );
+    if (alreadyCreated.length) {
+      dispatchToast("Link already created", "warning");
       return;
     }
     if (isLoading) return;
@@ -54,7 +62,7 @@ export default function Home() {
         id: data.id,
         url: `${window.location.origin}/${data.id}`,
       };
-      setUrlData(newUrlData);
+      setUrlData([...(urlData ?? []), newUrlData]);
       setIsLoading(false);
     }
   };
@@ -66,10 +74,11 @@ export default function Home() {
     setDestinationUrl(value);
   };
 
-  const handleCopyUrl = () => {
-    if (urlData?.url) {
-      dispatchToast("Copied to clipboard", "copy");
-      copy(urlData?.url);
+  const handleCopyUrl = async (urlItem: URLData) => {
+    const url = urlItem.url;
+    if (url) {
+      const result = await copy(url);
+      result && dispatchToast("Copied to clipboard", "copy");
     }
   };
 
@@ -91,13 +100,15 @@ export default function Home() {
           </label>
           <span className="flex flex-wrap md:flex-nowrap rounded-sm overflow-hidden block w-full">
             <div className="w-full relative">
-              <input
-                className="h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
-                value={destinationUrl}
-                onChange={handleOnChangeDestinationUrl}
-                id="url"
-                placeholder="Paste a link here"
-              />
+              <ErrorBoundary name="url-input">
+                <input
+                  className="h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
+                  value={destinationUrl}
+                  onChange={handleOnChangeDestinationUrl}
+                  id="url"
+                  placeholder="Paste a link here"
+                />
+              </ErrorBoundary>
             </div>
             <button
               className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
@@ -109,37 +120,41 @@ export default function Home() {
             </button>
           </span>
         </form>
-        {urlData && typeof window !== "undefined" && (
-          <div className="result-box flex bg-brand-grayish-green-100 rounded-sm mt-2 p-2">
-            <div className="flex flex-col">
-              <span>
-                <span className="mr-1.5">Click to visit:</span>
-                <a
-                  className="text-brand-neon-green-100 break-all font-semibold"
-                  href={urlData.url}
-                  target="_blank"
-                >
-                  {urlData.url}
-                </a>
-              </span>
-              <span>
-                <span className="mr-1.5">Destination:</span>
-                <a
-                  className="mb-1.5 break-all"
-                  href={urlData.destination}
-                  target="_blank"
-                >
-                  {urlData.destination}
-                </a>
-              </span>
-            </div>
-            <div className="flex w-16 min-w-[4rem] max-w-[4rem] items-center justify-center">
-              <button onClick={handleCopyUrl}>
-                <ClipboardIcon />
-              </button>
-            </div>
-          </div>
-        )}
+        {urlData.length > 0 &&
+          typeof window !== "undefined" &&
+          urlData.map((urlItem) => (
+            <ErrorBoundary name="url-list" key={urlItem.id}>
+              <div className="result-box flex bg-brand-grayish-green-100 rounded-sm mt-2 p-2">
+                <div className="flex flex-col">
+                  <span>
+                    <span className="mr-1.5">Click to visit:</span>
+                    <a
+                      className="text-brand-neon-green-100 break-all font-semibold"
+                      href={urlItem.url}
+                      target="_blank"
+                    >
+                      {urlItem.url}
+                    </a>
+                  </span>
+                  <span>
+                    <span className="mr-1.5">Destination:</span>
+                    <a
+                      className="mb-1.5 break-all"
+                      href={urlItem.destination}
+                      target="_blank"
+                    >
+                      {urlItem.destination}
+                    </a>
+                  </span>
+                </div>
+                <div className="flex w-16 min-w-[4rem] max-w-[4rem] items-center justify-center">
+                  <button onClick={() => handleCopyUrl(urlItem)}>
+                    <ClipboardIcon />
+                  </button>
+                </div>
+              </div>
+            </ErrorBoundary>
+          ))}
         <p className="mt-2 text-brand-dark-green-100">
           Experience the magically URL shortening powers of{" "}
           <span className="font-bold">NoLongr</span>. This tool will help you to

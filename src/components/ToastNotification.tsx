@@ -35,7 +35,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       handleDismissToast();
-    }, duration, handleDismissToast);
+    }, duration);
 
     return () => clearTimeout(timeout);
   }, [duration, handleDismissToast]);

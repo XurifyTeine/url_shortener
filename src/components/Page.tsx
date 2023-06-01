@@ -15,7 +15,7 @@ export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { state: toastState } = useToast();
   return (
     <>
-      <ErrorBoundary>
+      <ErrorBoundary name="global">
         {children}
       </ErrorBoundary>
       <GitHubLink />

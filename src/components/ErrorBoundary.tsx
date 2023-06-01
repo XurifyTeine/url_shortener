@@ -2,13 +2,13 @@ import React from "react";
 
 interface ErrorBoundaryProps {
   children?: React.ReactNode;
-  name: string;
+  name?: string;
 }
 
 interface ErrorBoundaryState {
     error: Error | null;
     errorInfo: React.ErrorInfo | null;
-    name: string | null;
+    name?: string | null;
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {

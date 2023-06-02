@@ -7,6 +7,7 @@ import { useToast } from "@/src/context/ToastContext";
 import { URLDataNextAPI } from "./api/create-short-url";
 import { useCopyToClipboard } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
+import { URL_REGEX } from "@/src/constants";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -26,7 +27,11 @@ export default function Home() {
   ) => {
     e.preventDefault();
     if (destinationUrl.trim() === "") {
-      dispatchToast("An incorrect URL was provided", "danger", 7000);
+      dispatchToast("Please enter in a URL", "danger", 5000);
+      return;
+    }
+    if (!URL_REGEX.test(destinationUrl)) {
+      dispatchToast("This is not a vaid URL", "danger", 5000);
       return;
     }
     const alreadyCreated = urlData.filter(

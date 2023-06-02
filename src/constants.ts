@@ -1,2 +1,2 @@
-export const BASE_URL = process.env.NODE_ENV === "production" ? process.env.GO_SERVER_URL : "http://192.168.0.229:8080"
-export const HTTPS_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/
+export const BASE_URL = process.env.NODE_ENV === "production" ? `${process.env.GO_SERVER_URL}/api` : "http://192.168.0.229:8080/api"
+export const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/

@@ -20,7 +20,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
   duration = 5000,
 }) => {
   const defaultClassName =
-    "animate-slide-in absolute top-2 right-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow";
+    "animate-slide-in fixed top-2 right-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow";
   const [className, setClassName] = React.useState(defaultClassName);
   const { dismissToast } = useToast();
   const id = `toast-${type}`;

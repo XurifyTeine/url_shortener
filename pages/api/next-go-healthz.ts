@@ -6,6 +6,7 @@ export default async function handler(
   res: NextApiResponse<string>
 ) {
   const goServerResp = await fetch(`${BASE_URL}/healthz`, {
+    credentials: 'same-origin',
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",

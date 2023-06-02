@@ -24,6 +24,11 @@ export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
           content="This is a simple tool made for the simple purpose of shortening URLs!"
           key="desc"
         />
+        <meta property="og:image" content="https://nolongr.vercel.app/api/og" />
+        <meta property="og:title" content="NoLongr" />
+        <meta property="og:description" content="NoLongr - URL Shortener" />
+        <meta property="og:url" content="https://nolongr.vercel.app" />
+        <meta property="twitter:card" content="summary_large_image" />
       </Head>
       <ErrorBoundary name="global">{children}</ErrorBoundary>
       <GitHubLink />

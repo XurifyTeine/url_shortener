@@ -6,6 +6,7 @@ export const GitHubLink: React.FC = () => {
       aria-label="Click to view the GitHub repo"
       className="w-10 h-10 absolute bottom-2 right-2"
       href="https://github.com/XurifyTeine/url_shortener_frontend"
+      target="_blank noreferrer noopener"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path

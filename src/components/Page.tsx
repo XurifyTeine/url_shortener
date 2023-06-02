@@ -28,7 +28,10 @@ export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
         <meta property="og:title" content="NoLongr" />
         <meta property="og:description" content="NoLongr - URL Shortener" />
         <meta property="og:url" content="https://nolongr.vercel.app" />
-        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:image" content="https://nolongr.vercel.app/api/og" />
+        <meta property="twitter:card" content="summary" />
+        <meta property="twitter:title" content="NoLongr" />
+        <meta property="twitter:description" content="NoLongr - URL Shortener" />
       </Head>
       <ErrorBoundary name="global">{children}</ErrorBoundary>
       <GitHubLink />

@@ -9,9 +9,9 @@ const nextConfig = {
   async headers() {
     const ContentSecurityPolicy = `
       default-src 'self';
-      script-src 'self';
+      script-src 'self' 'unsafe-inline';
       child-src 'self';
-      style-src 'self';
+      style-src 'self' 'unsafe-inline';
       font-src 'self';
       connect-src 'self' vitals.vercel-insights.com;
     `;

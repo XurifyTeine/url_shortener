@@ -5,6 +5,13 @@ export const config = {
   runtime: "edge",
 };
 
+export const OGImageResponse = () => {
+  return new ImageResponse(Icon, {
+    width: 500,
+    height: 500,
+  });
+}
+
 const Icon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -47,9 +54,4 @@ const Icon = (
   </svg>
 );
 
-export default function () {
-  return new ImageResponse(Icon, {
-    width: 500,
-    height: 500,
-  });
-}
+export default OGImageResponse;

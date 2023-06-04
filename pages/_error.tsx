@@ -12,7 +12,7 @@ const inter = Nunito({
 interface ErrorPageProps {
   statusCode?: number;
   errorMessage?: string | null;
-};
+}
 
 const Error: NextPage<ErrorPageProps> = ({ statusCode, errorMessage }) => {
   return (

@@ -20,7 +20,7 @@ export default function Home() {
   const [destinationUrl, setDestinationUrl] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState(false);
   const { dispatchToast } = useToast();
-  const [_value, copy] = useCopyToClipboard();
+  const [, copy] = useCopyToClipboard();
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -83,7 +83,7 @@ export default function Home() {
     const url = urlItem.url;
     if (url) {
       const result = await copy(url);
-      result && dispatchToast("Copied to clipboard", "copy");
+      result && dispatchToast("Successfully copied to clipboard", "copy");
     }
   };
 

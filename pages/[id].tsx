@@ -1,13 +1,6 @@
-import { Nunito } from "next/font/google";
 import { GetServerSideProps } from "next/types";
 import { BASE_URL } from "@/src/constants";
 import { URLDataResponse } from "@/src/interfaces";
-
-const inter = Nunito({
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-  fallback: ["ui-sans-serif"],
-});
 
 export default function RedirectPage() {
   return null;

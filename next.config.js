@@ -39,6 +39,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'clipboard-read=self,clipboard-write=self,web-share=self,cross-origin-isolated=self',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; connect-src vitals.vercel-insights.com*; child-src 'none';"
+          }
         ]
       }
     ]

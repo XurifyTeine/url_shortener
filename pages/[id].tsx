@@ -34,7 +34,7 @@ export default function RedirectPage() {
       if (result?.error) {
         setErrorMessage(result.error);
       } else if (result.result?.destination) {
-        window.location.replace(result.result.destination)
+        window.location.replace(result.result.destination);
       }
     })();
   }, []);
@@ -49,40 +49,47 @@ export default function RedirectPage() {
         Sorry, it looks like this link is broken 😥
       </h2>
       {errorMessage && <span>{errorMessage}</span>}
-      <Link href="/" className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200">
+      <Link
+        href="/"
+        className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200"
+      >
         <span>Back to Home</span>
       </Link>
     </main>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  query,
+  res,
+}) => {
   const shortId = query["id"];
-  const url = `${BASE_URL}/urls/${shortId}`;
 
-  const response = await fetch(url);
-  const result: URLDataResponse = await response.json();
-  const data: URLDataResponse | null = result || null;
+  try {
+    const url = `${BASE_URL}/urls/${shortId}`;
 
-  console.log(data, 'DATA3')
+    const response = await fetch(url);
+    const result: URLDataResponse = await response.json();
+    const data: URLDataResponse | null = result || null;
 
-  if (data && data.error) {
-    const error = {
-      data,
-      error: data.error,
-      url,
-    };
-    console.error("SERVERSIDE ID PAGE ERROR:", error);
+    if (!data) {
+      return { notFound: true };
+    } else if (data && data.error) {
+      const error = {
+        data,
+        error: data.error,
+        url,
+      };
+      console.error("SERVERSIDE ID PAGE ERROR:", error);
+      return { notFound: true };
+    } else if (data && data.result && data.result.destination)
+      return {
+        redirect: {
+          destination: data.result.destination,
+          permanent: false,
+        },
+      };
+  } catch (err) {
+    return { notFound: true };
   }
-
-  if (data && data.result && data.result.destination) {
-    return {
-      redirect: {
-        destination: data.result.destination,
-        permanent: false,
-      },
-    };
-  }
-  
-  return { props: {} };
 };

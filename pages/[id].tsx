@@ -18,6 +18,7 @@ export default function RedirectPage() {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    return;
     const id = getIdFromPathname(window.location.pathname);
     if (!id) return;
 
@@ -63,7 +64,9 @@ export const getServerSideProps: GetServerSideProps = async ({ query, res }) => 
   const result: URLDataResponse = await response.json();
   const data: URLDataResponse | null = result || null;
 
-  if (data.error) {
+  console.log(data, 'DATA3')
+
+  if (data && data.error) {
     const error = {
       data,
       error: data.error,

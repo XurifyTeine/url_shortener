@@ -3,6 +3,10 @@ import { Nunito } from "next/font/google";
 import Link from "next/link";
 import { getIdFromPathname } from "@/src/utils";
 import { URLDataNextAPI } from "./api/create-short-url";
+import { GetServerSideProps } from "next/types";
+import { BASE_URL } from "@/src/constants";
+import { URLDataResponse } from "@/src/interfaces";
+import { NextResponse } from "next/server";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -50,3 +54,32 @@ export default function RedirectPage() {
     </main>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
+  const shortId = query["id"];
+  const url = `${BASE_URL}/urls/${shortId}`;
+
+  const response = await fetch(url);
+  const result: URLDataResponse = await response.json();
+  const data: URLDataResponse | null = result || null;
+
+  if (data.error) {
+    const error = {
+      data,
+      error: data.error,
+      url,
+    };
+    console.error("SERVERSIDE ID PAGE ERROR:", error);
+  }
+
+  if (data && data.result && data.result.destination) {
+    return {
+      redirect: {
+        destination: data.result.destination,
+        permanent: false,
+      },
+    };
+  }
+  
+  return { props: {} };
+};

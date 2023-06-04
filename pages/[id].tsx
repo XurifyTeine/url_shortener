@@ -1,12 +1,7 @@
-import React from "react";
 import { Nunito } from "next/font/google";
-import Link from "next/link";
-import { getIdFromPathname } from "@/src/utils";
-import { URLDataNextAPI } from "./api/create-short-url";
 import { GetServerSideProps } from "next/types";
 import { BASE_URL } from "@/src/constants";
 import { URLDataResponse } from "@/src/interfaces";
-import { NextResponse } from "next/server";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -15,54 +10,10 @@ const inter = Nunito({
 });
 
 export default function RedirectPage() {
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    return;
-    const id = getIdFromPathname(window.location.pathname);
-    if (!id) return;
-
-    (async () => {
-      const response = await fetch(`/api/urls/LjjdON`, {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        method: "GET",
-      });
-      const result: URLDataNextAPI = await response.json();
-      if (result?.error) {
-        setErrorMessage(result.error);
-      } else if (result.result?.destination) {
-        window.location.replace(result.result.destination);
-      }
-    })();
-  }, []);
-
-  return (
-    <main
-      className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 justify-center text-center"
-      style={inter.style}
-    >
-      <h1 className="font-bold text-8xl">404</h1>
-      <h2 className="font-light text-3xl">
-        Sorry, it looks like this link is broken 😥
-      </h2>
-      {errorMessage && <span>{errorMessage}</span>}
-      <Link
-        href="/"
-        className="h-6 p-5 mt-5 bg-white text-black flex items-center justify-center rounded hover:bg-gray-200 duration-200"
-      >
-        <span>Back to Home</span>
-      </Link>
-    </main>
-  );
+  return null;
 }
 
-export const getServerSideProps: GetServerSideProps = async ({
-  query,
-  res,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const shortId = query["id"];
 
   try {
@@ -80,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async ({
         error: data.error,
         url,
       };
-      console.error("SERVERSIDE ID PAGE ERROR:", error);
+      console.error(`SERVERSIDE [ID] PAGE ERROR: ${shortId}`, error);
       return { notFound: true };
     } else if (data && data.result && data.result.destination)
       return {

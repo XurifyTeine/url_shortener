@@ -7,14 +7,6 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   async headers() {
-    const ContentSecurityPolicy = `
-      default-src 'self' https://*;
-      script-src 'self' 'unsafe-inline' https://*;
-      child-src 'self' https://*;
-      style-src 'self' 'unsafe-inline' https://*;
-      font-src 'self' https://*;
-      connect-src 'self' vitals.vercel-insights.com https://*;
-    `;
     return [
       {
         source: "/:path*",
@@ -47,10 +39,6 @@ const nextConfig = {
             key: "Permissions-Policy",
             value:
               "clipboard-read=self,clipboard-write=self,web-share=self,cross-origin-isolated=self",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: ContentSecurityPolicy.replace(/\s{2,}/g, " ").trim(),
           },
         ],
       },

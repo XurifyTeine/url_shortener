@@ -8,12 +8,12 @@ const nextConfig = {
   },
   async headers() {
     const ContentSecurityPolicy = `
-      default-src 'self';
-      script-src 'self' 'unsafe-inline';
-      child-src 'self';
-      style-src 'self' 'unsafe-inline';
-      font-src 'self';
-      connect-src 'self' vitals.vercel-insights.com;
+      default-src 'self' https://*;
+      script-src 'self' 'unsafe-inline' https://*;
+      child-src 'self' https://*;
+      style-src 'self' 'unsafe-inline' https://*;
+      font-src 'self' https://*;
+      connect-src 'self' vitals.vercel-insights.com https://*;
     `;
     return [
       {

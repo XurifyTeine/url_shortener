@@ -1,10 +1,16 @@
-package handler
+package main
 
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
+func greet(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello World! %s", time.Now())
+}
+
+func Main() {
+	http.HandleFunc("/", greet)
+	http.ListenAndServe(":8080", nil)
 }

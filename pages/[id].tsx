@@ -36,5 +36,5 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   } catch (err) {
     return { notFound: true };
   }
-  return { props: {} };
+  return { notFound: true };
 };

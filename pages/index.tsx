@@ -1,5 +1,4 @@
 import React from "react";
-import { Nunito } from "next/font/google";
 
 import { URLData } from "@/src/interfaces";
 import LoadingIcon from "@/src/components/LoadingIcon";
@@ -8,12 +7,6 @@ import { URLDataNextAPI } from "./api/create-short-url";
 import { useCopyToClipboard } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 import { URL_REGEX } from "@/src/constants";
-
-const inter = Nunito({
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-  fallback: ["ui-sans-serif"],
-});
 
 export default function Home() {
   const [urlData, setUrlData] = React.useState<URLData[]>([]);
@@ -88,10 +81,7 @@ export default function Home() {
   };
 
   return (
-    <main
-      className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 pt-32"
-      style={inter.style}
-    >
+    <main className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 pt-32">
       <h1 className="text-white text-4xl uppercase mb-5 font-bold">
         URL Shortener
       </h1>
@@ -152,9 +142,15 @@ export default function Home() {
                     </a>
                   </span>
                 </div>
-                <div className="flex w-16 min-w-[4rem] max-w-[4rem] items-center justify-center">
+                <div className="flex w-16 min-w-[4rem] max-w-[4rem] items-center justify-center ml-auto">
                   <button onClick={() => handleCopyUrl(urlItem)}>
                     <ClipboardIcon />
+                  </button>
+                  <button
+                    className="ml-2"
+                    onClick={() => handleCopyUrl(urlItem)}
+                  >
+                    <QRCodeIcon />
                   </button>
                 </div>
               </div>
@@ -184,3 +180,22 @@ const ClipboardIcon = () => (
     ></path>
   </svg>
 );
+
+const QRCodeIcon = () => {
+  return (
+    <svg
+      className="w-5 h-5"
+      xmlns="http://www.w3.org/2000/svg"
+      version="1.1"
+      viewBox="0 0 308.667 308.667"
+      xmlSpace="preserve"
+    >
+      <g fill="#ffffff">
+        <path d="M38.073 38.073H85.66499999999999V85.66499999999999H38.073z"></path>
+        <path d="M38.073 223.002H85.66499999999999V270.594H38.073z"></path>
+        <path d="M0 163.852v144.815h123.739v-66.629h28.555v65.269h34.674v-28.555h27.195v28.555h34.674v-32.634h25.156v32.634h34.674v-34.674h-32.634v-32.634h-34.674v32.634H218.58v-67.308h-31.612V176.77h32.634v32.634h34.674v-21.756h19.717V236.6h34.674v-50.991h-21.756v-30.595h21.756V0H184.928v.228h-32.634v37.845h-28.555V0H0v144.135h21.756v19.717H0zm101.982 123.059H21.756v-80.226h80.226v80.226zm52.351-77.507h29.578v30.595h-29.578v-30.595zm0-65.269h27.533v30.595h-27.533v-30.595zm119.66 8.839h-18.7v-10.878h-68.326v-18.357h87.025v29.235zM206.684 21.756h80.226v80.226h-80.226V21.756zm-21.756 87.705h-30.595v-67.76h30.595v67.76zm-32.634 32.635h-28.468v-30.595h28.468v30.595zM21.756 21.756h80.226v80.226H21.756V21.756zm67.396 101.983v20.396h30.508v32.634h32.634v30.595h-28.555v-22.436H34.674v-8.159h54.391v-34.674H34.674v-18.357h54.478z"></path>
+        <path d="M223.002 38.073H270.594V85.66499999999999H223.002z"></path>
+      </g>
+    </svg>
+  );
+};

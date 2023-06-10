@@ -216,7 +216,7 @@ func getEnvironment() string {
 	return os.Getenv("APP_ENV")
 }
 
-func main() {
+func Handler() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

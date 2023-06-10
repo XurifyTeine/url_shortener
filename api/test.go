@@ -258,6 +258,6 @@ func handleRouter() {
 	}
 }
 
-func Handler() {
+func Handlerr() {
 	handleRouter()
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	crand "crypto/rand"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -217,11 +216,11 @@ func getEnvironment() string {
 	return os.Getenv("APP_ENV")
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
-}
+// func Handler(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
+// }
 
-func Handlerr() {
+func Handlerr(w http.ResponseWriter, r *http.Request) {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

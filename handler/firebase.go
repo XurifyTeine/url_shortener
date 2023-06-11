@@ -1,4 +1,4 @@
-package handlerr
+package firebase
 
 import (
 	"context"
@@ -12,10 +12,8 @@ import (
 	"time"
 
 	firestore "cloud.google.com/go/firestore"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"golang.org/x/exp/slices"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -208,7 +206,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 	}
 }
 
-func handleRouteHealthz(context *gin.Context) {
+func HandleRouteHealthz(context *gin.Context) {
 	context.JSON(http.StatusOK, "Success")
 }
 
@@ -220,44 +218,44 @@ func getEnvironment() string {
 // 	fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
 // }
 
-func Handlerr(w http.ResponseWriter, r *http.Request) {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+// func Handlerr(w http.ResponseWriter, r *http.Request) {
+// 	port := os.Getenv("PORT")
+// 	if port == "" {
+// 		port = "8080"
+// 	}
 
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
+// 	gin.SetMode(gin.ReleaseMode)
+// 	router := gin.Default()
 
-	allowOrigins := []string{productionSiteUrl}
-	if getEnvironment() == "development" {
-		allowOrigins = []string{"http://localhost:3000", productionSiteUrl}
-	}
+// 	allowOrigins := []string{productionSiteUrl}
+// 	if getEnvironment() == "development" {
+// 		allowOrigins = []string{"http://localhost:3000", productionSiteUrl}
+// 	}
 
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     allowOrigins,
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			if getEnvironment() == "development" {
-				containsOrigin := slices.Contains(allowOrigins, "http://localhost:3000")
-				return containsOrigin
-			} else {
-				containsOrigin := slices.Contains(allowOrigins, productionSiteUrl)
-				return containsOrigin
-			}
-		},
-		MaxAge: 12 * time.Hour,
-	}))
+// 	router.Use(cors.New(cors.Config{
+// 		AllowOrigins:     allowOrigins,
+// 		AllowMethods:     []string{"GET", "POST"},
+// 		AllowHeaders:     []string{"Origin"},
+// 		ExposeHeaders:    []string{"Content-Length"},
+// 		AllowCredentials: true,
+// 		AllowOriginFunc: func(origin string) bool {
+// 			if getEnvironment() == "development" {
+// 				containsOrigin := slices.Contains(allowOrigins, "http://localhost:3000")
+// 				return containsOrigin
+// 			} else {
+// 				containsOrigin := slices.Contains(allowOrigins, productionSiteUrl)
+// 				return containsOrigin
+// 			}
+// 		},
+// 		MaxAge: 12 * time.Hour,
+// 	}))
 
-	router.GET("/api/healthz", handleRouteHealthz)
-	router.GET("/api/urls/:id", handleRouteFindURLByID)
-	router.GET("/api/new-short-id", handleRouteGetNewShortId)
-	router.POST("/api/create-short-url", handleRouteCreateShortUrl)
-	log.Printf("Listening on %s", ":"+port)
-	if err := router.Run(":" + port); err != nil {
-		log.Panicf("Router error: %s", err)
-	}
-}
+// 	router.GET("/api/healthz", handleRouteHealthz)
+// 	router.GET("/api/urls/:id", handleRouteFindURLByID)
+// 	router.GET("/api/new-short-id", handleRouteGetNewShortId)
+// 	router.POST("/api/create-short-url", handleRouteCreateShortUrl)
+// 	log.Printf("Listening on %s", ":"+port)
+// 	if err := router.Run(":" + port); err != nil {
+// 		log.Panicf("Router error: %s", err)
+// 	}
+// }

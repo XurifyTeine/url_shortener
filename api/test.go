@@ -4,6 +4,7 @@ import (
 	"context"
 	crand "crypto/rand"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -214,6 +215,10 @@ func handleRouteHealthz(context *gin.Context) {
 
 func getEnvironment() string {
 	return os.Getenv("APP_ENV")
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
 }
 
 func Handlerr() {

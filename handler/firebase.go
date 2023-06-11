@@ -1,4 +1,4 @@
-package firebase
+package firebasehelp
 
 import (
 	"context"

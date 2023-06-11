@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/kirito41dd/vercel-faas/handler"
-	firebase "main.go/handler"
+	firebasehelp "main.go/handler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,8 +19,7 @@ func registerRouter(r *gin.RouterGroup) {
 	r.GET("/api/ping", handler.Ping)
 	// for nostr NIP-05
 	r.GET("/.well-known/nostr.json", handler.Cors, handler.NIP05)
-	r.GET("/api/healthzs", firebase.HandleRouteHealthz)
-	r.GET("/api/healthz", firebase.HandleRouteHealthz)
+	r.GET("/api/healthzs", firebasehelp.HandleRouteHealthz)
 }
 
 // init gin app

@@ -71,7 +71,7 @@ func randomSequence(length int) string {
 // }
 
 func getNewFirestoreClient(ctx context.Context) (*firestore.Client, error) {
-	opts := option.WithCredentialsFile("/home/xurifyteine/Programming/Projects/url_shortener_frontend/firebase/service_account_key.json")
+	opts := option.WithCredentialsFile("/firebase/service_account_key.json")
 	return firestore.NewClient(ctx, firebaseProjectId, opts)
 	//return firestore.NewClient(ctx, firebaseProjectId, option.WithCredentialsFile("/home/xurifyteine/Programming/Projects/url_shortener_frontend/firebase/serviceAccountKey.json"))
 }

@@ -5,21 +5,21 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kirito41dd/vercel-faas/handler"
-	firebasehelp "main.go/handler"
-
 	"github.com/gin-gonic/gin"
+	firebasehelp "main.go/firebase"
+	handler "main.go/handler"
 )
 
 var (
 	app *gin.Engine
 )
 
-func registerRouter(r *gin.RouterGroup) {
-	r.GET("/api/ping", handler.Ping)
-	// for nostr NIP-05
-	r.GET("/.well-known/nostr.json", handler.Cors, handler.NIP05)
-	r.GET("/api/healthzs", firebasehelp.HandleRouteHealthz)
+func registerRouter(router *gin.RouterGroup) {
+	router.GET("/api/ping", handler.Ping)
+	router.GET("/api/healthz", firebasehelp.HandleRouteHealthz)
+	router.GET("/api/urls/:id", firebasehelp.HandleRouteFindURLById)
+	router.GET("/api/new-short-id", firebasehelp.HandleRouteGetNewShortId)
+	router.POST("/api/create-short-url", firebasehelp.HandleRouteCreateShortUrl)
 }
 
 // init gin app

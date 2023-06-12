@@ -53,7 +53,7 @@ var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456
 
 const firestoreAccountFile = "serviceAccountKey.json"
 const productionSiteUrl = "https://nolongr.vercel.app/"
-const firestoreProjectID = "nolongr-xurifyteine"
+const firebaseProjectId = "nolongr-xurifyteine"
 
 func randomSequence(length int) string {
 	b := make([]rune, length)
@@ -71,14 +71,16 @@ func randomSequence(length int) string {
 // }
 
 func getNewFirestoreClient(ctx context.Context) (*firestore.Client, error) {
-	return firestore.NewClient(ctx, firestoreProjectID, option.WithServiceAccountFile(firestoreAccountFile))
+	opts := option.WithCredentialsFile("/home/xurifyteine/Programming/Projects/url_shortener_frontend/firebase/service_account_key.json")
+	return firestore.NewClient(ctx, firebaseProjectId, opts)
+	//return firestore.NewClient(ctx, firebaseProjectId, option.WithCredentialsFile("/home/xurifyteine/Programming/Projects/url_shortener_frontend/firebase/serviceAccountKey.json"))
 }
 
 func addURLToFirestore(url string) (map[string]interface{}, error) {
 	ctx := context.Background()
 	client, err := getNewFirestoreClient(ctx)
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 
 	newURLID := randomSequence(6)
@@ -120,10 +122,11 @@ func checkIfUrlIdExists(urlId string) bool {
 	}
 }
 
-func retrieveDestinationUrl(url string) (interface{}, error) {
+func retrieveDestinationUrl(id string) (interface{}, error) {
 	ctx := context.Background()
 	client, err := getNewFirestoreClient(ctx)
-	documentSnapshot, err := client.Collection("urls").Doc(url).Get(ctx)
+	log.Println(client, id, firestoreAccountFile, "DADSDASDA4")
+	documentSnapshot, err := client.Collection("urls").Doc(id).Get(ctx)
 	if err != nil && status.Code(err) != codes.NotFound {
 		log.Println("Retrieving Original URL Error:", err)
 	}
@@ -138,7 +141,7 @@ type ErrorResponse struct {
 	Id        string `json:"id"`
 }
 
-func handleRouteFindURLByID(context *gin.Context) {
+func HandleRouteFindURLById(context *gin.Context) {
 	id := context.Param("id")
 	urlData, err := retrieveDestinationUrl(id)
 	if err != nil {
@@ -154,7 +157,7 @@ func handleRouteFindURLByID(context *gin.Context) {
 	}
 }
 
-func handleRouteGetNewShortId(context *gin.Context) {
+func HandleRouteGetNewShortId(context *gin.Context) {
 	id := context.Query("id")
 
 	newID := id
@@ -173,12 +176,7 @@ func handleRouteGetNewShortId(context *gin.Context) {
 	context.JSON(http.StatusOK, urlData)
 }
 
-type Foo struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-}
-
-func handleRouteCreateShortUrl(context *gin.Context) {
+func HandleRouteCreateShortUrl(context *gin.Context) {
 	destination := context.Query("url")
 
 	match, _ := regexp.MatchString("^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/|\\/|\\/\\/)?[A-z0-9_-]*?[:]?[A-z0-9_-]*?[@]?[A-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$", destination)

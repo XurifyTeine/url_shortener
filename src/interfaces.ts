@@ -18,3 +18,9 @@ export type URLDataResponse = {
   result?: URLData;
   error: URLError;
 }
+
+export type URLDataNextAPI = {
+  result?: URLData;
+  message?: string;
+  error?: string;
+};

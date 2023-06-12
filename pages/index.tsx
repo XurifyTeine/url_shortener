@@ -1,9 +1,8 @@
 import React from "react";
 
-import { URLData } from "@/src/interfaces";
+import { URLData, URLDataNextAPI } from "@/src/interfaces";
 import LoadingIcon from "@/src/components/LoadingIcon";
 import { useToast } from "@/src/context/ToastContext";
-import { URLDataNextAPI } from "./api/create-short-url";
 import { useCopyToClipboard } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 import { URL_REGEX } from "@/src/constants";

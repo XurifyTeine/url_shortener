@@ -51,7 +51,6 @@ func RandomInt64(maxInteger int64) int64 {
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12345678910-_~")
 
-const firestoreAccountFile = "serviceAccountKey.json"
 const productionSiteUrl = "https://nolongr.vercel.app/"
 const firebaseProjectId = "nolongr-xurifyteine"
 
@@ -63,17 +62,23 @@ func randomSequence(length int) string {
 	return string(b)
 }
 
-// type URLData struct {
-// 	destination  string `json:"destination"`
-// 	id           string `json:"id"`
-// 	date_created string `json:"date_created"`
-// 	url          string `json:"url"`
-// }
-
 func getNewFirestoreClient(ctx context.Context) (*firestore.Client, error) {
-	opts := option.WithCredentialsFile("/firebase/service_account_key.json")
+	jsonCredentials := []byte(`
+	{
+	  "type": "service_account",
+	  "project_id": "your-project-id",
+	  "private_key_id": "your-private-key-id",
+	  "private_key": "your-private-key",
+	  "client_email": "your-client-email",
+	  "client_id": "your-client-id",
+	  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+	  "token_uri": "https://oauth2.googleapis.com/token",
+	  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+	  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/your-client-email"
+	}
+	`)
+	opts := option.WithCredentialsJSON(jsonCredentials)
 	return firestore.NewClient(ctx, firebaseProjectId, opts)
-	//return firestore.NewClient(ctx, firebaseProjectId, option.WithCredentialsFile("/home/xurifyteine/Programming/Projects/url_shortener_frontend/firebase/serviceAccountKey.json"))
 }
 
 func addURLToFirestore(url string) (map[string]interface{}, error) {
@@ -125,7 +130,6 @@ func checkIfUrlIdExists(urlId string) bool {
 func retrieveDestinationUrl(id string) (interface{}, error) {
 	ctx := context.Background()
 	client, err := getNewFirestoreClient(ctx)
-	log.Println(client, id, firestoreAccountFile, "DADSDASDA4")
 	documentSnapshot, err := client.Collection("urls").Doc(id).Get(ctx)
 	if err != nil && status.Code(err) != codes.NotFound {
 		log.Println("Retrieving Original URL Error:", err)

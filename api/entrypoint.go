@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"main.go/api/utils"
+	"main.go/utils"
 )
 
 var (

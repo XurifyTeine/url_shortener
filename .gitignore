@@ -44,3 +44,4 @@ firebase.json
 serviceAccountKey.json
 firebase/service_account_key.json
 .env
+utils/firebase.go

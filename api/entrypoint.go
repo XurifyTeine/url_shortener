@@ -6,25 +6,19 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	firebasehelp "main.go/firebase"
-	handler "main.go/handler"
+	"main.go/api/utils"
 )
 
 var (
 	app *gin.Engine
 )
 
-func registerRouter(router *gin.RouterGroup) {
-	router.GET("/api/ping", handler.Ping)
-	router.GET("/api/healthz", firebasehelp.HandleRouteHealthz)
-	router.GET("/api/urls/:id", firebasehelp.HandleRouteFindURLById)
-	router.GET("/api/new-short-id", firebasehelp.HandleRouteGetNewShortId)
-	router.POST("/api/create-short-url", firebasehelp.HandleRouteCreateShortUrl)
-}
-
-// init gin app
 func init() {
-	app = gin.New()
+	app = gin.Default()
+
+	utils.RegisterCors(app)
+
+	gin.SetMode(gin.ReleaseMode)
 
 	// Handling routing errors
 	app.NoRoute(func(c *gin.Context) {
@@ -38,11 +32,9 @@ func init() {
 
 	r := app.Group("/")
 
-	// register route
-	registerRouter(r)
+	utils.RegisterRouter(r)
 }
 
-// entrypoint
 func Handler(w http.ResponseWriter, r *http.Request) {
 	app.ServeHTTP(w, r)
 }

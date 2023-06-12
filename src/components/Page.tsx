@@ -16,12 +16,6 @@ const inter = Nunito({
 export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { state: toastState } = useToast();
 
-  React.useEffect(() => {
-    fetch(`/api/next-go-healthz`).catch((error) => {
-      console.error(error);
-    });
-  }, []);
-
   return (
     <>
       <PageHead />

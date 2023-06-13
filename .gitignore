@@ -45,3 +45,4 @@ serviceAccountKey.json
 firebase/service_account_key.json
 .env
 utils/firebase.go
+firebase/mock_service_account_key.json

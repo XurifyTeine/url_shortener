@@ -6,12 +6,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"main.go/utils"
+	utils "main.go/api-utils"
 )
 
-var (
-	app *gin.Engine
-)
+var app *gin.Engine
 
 func init() {
 	app = gin.Default()
@@ -20,7 +18,7 @@ func init() {
 
 	gin.SetMode(gin.ReleaseMode)
 
-	// Handling routing errors
+	// Handle routing errors
 	app.NoRoute(func(c *gin.Context) {
 		sb := &strings.Builder{}
 		sb.WriteString("routing err: no route, try this:\n")

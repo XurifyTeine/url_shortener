@@ -19,7 +19,6 @@ type ErrorResponse struct {
 }
 
 func RegisterRouter(router *gin.RouterGroup) {
-	router.GET("/api/healthz", handleRouteHealthz)
 	router.GET("/api/urls/:id", handleRouteFindURLById)
 	router.GET("/api/new-short-id", handleRouteGetNewShortId)
 	router.POST("/api/create-short-url", handleRouteCreateShortUrl)
@@ -112,8 +111,4 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 	} else {
 		context.JSON(http.StatusOK, map[string]interface{}{"result": urlData})
 	}
-}
-
-func handleRouteHealthz(context *gin.Context) {
-	context.JSON(http.StatusOK, "Success")
 }

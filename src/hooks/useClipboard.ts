@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 
 type CopiedValue = string | null;
 type CopyFn = (text: string) => Promise<boolean>;
 
 export const useCopyToClipboard = (): [CopiedValue, CopyFn] => {
-  const [copiedText, setCopiedText] = React.useState<CopiedValue>(null);
+  const [copiedText, setCopiedText] = useState<CopiedValue>(null);
 
   const copy: CopyFn = async (text) => {
     if (!navigator?.clipboard) {

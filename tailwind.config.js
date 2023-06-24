@@ -16,6 +16,7 @@ module.exports = {
         "brand-neon-green-200": "#9CD9B0",
         "brand-medium-green-100": "#A7BC96",
         "brand-grayish-green-100": "#99A88C",
+        "brand-grayish-green-200": "#BACAB0",
         "brand-dark-green-100": "#263A29",
         "brand-light-yellow-100": "#FFF8DE",
       },

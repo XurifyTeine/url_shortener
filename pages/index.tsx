@@ -1,17 +1,19 @@
 import React from "react";
-
 import { useQRCode } from "next-qrcode";
 
-import { URLData, URLDataNextAPI } from "@/src/interfaces";
-import LoadingIcon from "@/src/components/Icons/LoadingIcon";
 import { useToast } from "@/src/context/ToastContext";
+import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard, useLocalStorage } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
+
 import { BASE_URL, URL_REGEX } from "@/src/constants";
+import { URLData, URLDataNextAPI } from "@/src/interfaces";
+
+import LoadingIcon from "@/src/components/Icons/LoadingIcon";
 import ClipboardIcon from "@/src/components/Icons/ClipboardIcon";
 import QRCodeIcon from "@/src/components/Icons/QRCodeIcon";
-import { useModal } from "@/src/context/ModalContext";
 import GitHubLink from "@/src/components/Icons/GitHubLink";
+import TrashIcon from "@/src/components/Icons/TrashIcon";
 
 const ClientOnly = React.lazy(() =>
   import("@/src/components/ClientOnly").then((module) => ({
@@ -102,6 +104,11 @@ export default function Home() {
     );
   };
 
+  const handleDeleteShortUrl = (urlItem: URLData) => {
+    console.log('urlItem', urlItem);
+    dispatchToast("Not implemented yet 🤫", "warning");
+  }
+
   return (
     <main className="relative flex min-h-screen flex-col items-center p-2 bg-brand-green-200 pt-32">
       <h1 className="text-white text-4xl uppercase mb-5 font-bold">
@@ -143,40 +150,40 @@ export default function Home() {
               urlData.length > 0 &&
               urlData.map((urlItem) => (
                 <ErrorBoundary name="url-list" key={urlItem.id}>
-                  <div className="result-box flex bg-brand-grayish-green-100 rounded-sm mt-2 p-2">
-                    <div className="flex flex-col">
-                      <span>
-                        <span className="mr-1.5">Click to visit:</span>
-                        <a
-                          className="text-brand-neon-green-100 break-all font-semibold"
-                          href={urlItem.url}
-                          target="_blank"
-                        >
-                          {urlItem.url}
-                        </a>
-                      </span>
-                      <span>
-                        <span className="mr-1.5">Destination:</span>
-                        <a
-                          className="mb-1.5 break-all"
-                          href={urlItem.destination}
-                          target="_blank"
-                        >
-                          {urlItem.destination}
-                        </a>
-                      </span>
+                  <div className="flex mt-2">
+                    <div className="result-box flex w-full bg-brand-grayish-green-100 rounded-sm">
+                      <div className="flex flex-col w-full p-2">
+                        <span>
+                          <span className="mr-1.5">Click to visit:</span>
+                          <a
+                            className="text-brand-neon-green-100 break-all font-semibold"
+                            href={urlItem.url}
+                            target="_blank"
+                          >
+                            {urlItem.url}
+                          </a>
+                        </span>
+                        <span className="flex">
+                          <span className="mr-1.5">Destination:</span>
+                          <input
+                            className="break-all w-full px-1 bg-white text-gray-500 rounded-sm"
+                            defaultValue={urlItem.destination}
+                            disabled={true}
+                          />
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-200 p-2">
+                        <button onClick={() => handleCopyUrl(urlItem)}>
+                          <ClipboardIcon />
+                        </button>
+                        <button onClick={() => handleOpenQRCodeModal(urlItem)}>
+                          <QRCodeIcon />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex w-16 min-w-[4rem] max-w-[4rem] items-center justify-center ml-auto">
-                      <button onClick={() => handleCopyUrl(urlItem)}>
-                        <ClipboardIcon />
-                      </button>
-                      <button
-                        className="ml-2"
-                        onClick={() => handleOpenQRCodeModal(urlItem)}
-                      >
-                        <QRCodeIcon />
-                      </button>
-                    </div>
+                    <button className="ml-1.5 px-1 bg-red-600 hover:bg-red-500" onClick={() => handleDeleteShortUrl(urlItem)}>
+                      <TrashIcon />
+                    </button>
                   </div>
                 </ErrorBoundary>
               ))}

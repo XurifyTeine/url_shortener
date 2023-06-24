@@ -51,6 +51,7 @@ export default function Home() {
     }
     if (isLoading) return;
     setIsLoading(true);
+    console.log('BASE_URL', BASE_URL, `${BASE_URL}/create-short-url?url=${destinationUrl}`);
     const response = await fetch(
       `${BASE_URL}/create-short-url?url=${destinationUrl}`,
       {

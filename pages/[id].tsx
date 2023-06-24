@@ -12,6 +12,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   try {
     const url = `${BASE_URL}/urls/${shortId}`;
 
+    console.log('URL3', url);
+
     const response = await fetch(url);
     const result: URLDataResponse = await response.json();
     const data: URLDataResponse | null = result || null;

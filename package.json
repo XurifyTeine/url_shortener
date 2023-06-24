@@ -21,6 +21,7 @@
     "eslint-config-next": "13.4.4",
     "firebase": "^9.22.1",
     "next": "13.4.4",
+    "next-qrcode": "^2.4.1",
     "nextjs-cors": "^2.1.2",
     "postcss": "8.4.23",
     "react": "18.2.0",

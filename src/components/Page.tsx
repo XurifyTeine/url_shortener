@@ -1,7 +1,6 @@
 import React from "react";
 import { Nunito } from "next/font/google";
 
-import GitHubLink from "@/src/components/Icons/GitHubLink";
 import ToastNotification from "@/src/components/ToastNotification";
 import { useToast } from "@/src/context/ToastContext";
 import ErrorBoundary from "./ErrorBoundary";

@@ -5,7 +5,7 @@ export const ClientOnly: React.FC<React.PropsWithChildren> = (props) => {
 
   const children = useMemo(() => {
     return render === true ? props.children : null;
-  }, [props.children]);
+  }, [props.children, render]);
 
   useEffect(() => {
     setRender(true);

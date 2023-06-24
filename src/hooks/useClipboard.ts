@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 type CopiedValue = string | null;
 type CopyFn = (text: string) => Promise<boolean>;

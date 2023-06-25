@@ -30,8 +30,6 @@ export default function Home() {
   const [, copy] = useCopyToClipboard();
   const { Canvas: QRCodeCanvas } = useQRCode();
 
-  const BASE_URL = process.env.NODE_ENV !== "production" ? process.env.PRODUCTION_SITE_URL : "http://localhost:3000/api"
-
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -183,7 +181,7 @@ export default function Home() {
                         </button>
                       </div>
                     </div>
-                    <button className="ml-1.5 px-1 bg-red-600 hover:bg-red-500" onClick={() => handleDeleteShortUrl(urlItem)}>
+                    <button className="ml-1.5 px-1 bg-light-danger hover:bg-red-500" onClick={() => handleDeleteShortUrl(urlItem)}>
                       <TrashIcon />
                     </button>
                   </div>

@@ -19,6 +19,7 @@ module.exports = {
         "brand-grayish-green-200": "#BACAB0",
         "brand-dark-green-100": "#263A29",
         "brand-light-yellow-100": "#FFF8DE",
+        "light-danger": "#ff3d3d",
       },
       keyframes: {
         "left-to-right": {

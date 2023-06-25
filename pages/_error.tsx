@@ -8,7 +8,7 @@ interface ErrorPageProps {
 }
 
 const Error: NextPage<ErrorPageProps> = ({ statusCode, errorMessage }) => {
-  console.log("errorMessage", errorMessage);
+  console.error(errorMessage);
   return (
     <main className="flex min-h-screen flex-col items-center p-2 bg-brand-green-200 justify-center text-center">
       <h1 className="font-bold text-8xl">{statusCode}</h1>

@@ -3,6 +3,7 @@ package utils
 import (
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"time"
 
@@ -25,9 +26,9 @@ func RegisterRouter(router *gin.RouterGroup) {
 }
 
 func RegisterCors(router *gin.Engine) {
-	allowOrigins := []string{productionSiteUrl}
+	allowOrigins := []string{PRODUCTION_SITE_URL}
 	if GetEnvironment() == "development" {
-		allowOrigins = []string{"http://localhost:3000", productionSiteUrl}
+		allowOrigins = []string{"http://localhost:3000", PRODUCTION_SITE_URL}
 	}
 
 	router.Use(cors.New(cors.Config{
@@ -41,7 +42,7 @@ func RegisterCors(router *gin.Engine) {
 				containsOrigin := slices.Contains(allowOrigins, "http://localhost:3000")
 				return containsOrigin
 			} else {
-				containsOrigin := slices.Contains(allowOrigins, productionSiteUrl)
+				containsOrigin := slices.Contains(allowOrigins, PRODUCTION_SITE_URL)
 				return containsOrigin
 			}
 		},
@@ -88,14 +89,23 @@ func handleRouteGetNewShortId(context *gin.Context) {
 func handleRouteCreateShortUrl(context *gin.Context) {
 	destination := context.Query("url")
 
+	destinationSiteUrled, err := url.Parse(destination)
+	productionSiteUrled, err := url.Parse(PRODUCTION_SITE_URL)
+	errorMessageIncorrectUrl := ErrorResponse{
+		Message:   "A URL was not provided or the input was incorrect",
+		ErrorCode: http.StatusForbidden,
+	}
+	if err != nil {
+		log.Fatal(err)
+	} else if productionSiteUrled.Hostname() == destinationSiteUrled.Hostname() {
+		context.JSON(http.StatusForbidden, map[string]ErrorResponse{"error": errorMessageIncorrectUrl})
+		return
+	}
+
 	match, _ := regexp.MatchString("^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/|\\/|\\/\\/)?[A-z0-9_-]*?[:]?[A-z0-9_-]*?[@]?[A-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$", destination)
 
 	if !match {
-		errorMessage := ErrorResponse{
-			Message:   "A URL was not provided or the input was incorrect",
-			ErrorCode: http.StatusForbidden,
-		}
-		context.JSON(http.StatusForbidden, map[string]ErrorResponse{"error": errorMessage})
+		context.JSON(http.StatusForbidden, map[string]ErrorResponse{"error": errorMessageIncorrectUrl})
 		return
 	}
 

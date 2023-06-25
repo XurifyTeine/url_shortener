@@ -6,7 +6,7 @@ import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard, useLocalStorage } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 
-import { URL_REGEX } from "@/src/constants";
+import { PRODUCTION_SITE_URL, URL_REGEX } from "@/src/constants";
 import { URLData, URLDataNextAPI } from "@/src/interfaces";
 
 import LoadingIcon from "@/src/components/Icons/LoadingIcon";
@@ -34,12 +34,16 @@ export default function Home() {
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
+    const productionSiteUrled = new URL(PRODUCTION_SITE_URL);
+    const destinationSiteUrled = new URL(destinationUrl);
     if (destinationUrl.trim() === "") {
-      dispatchToast("Please enter in a URL", "danger", 5000);
+      dispatchToast("Please enter in a URL", "warning", 5000);
       return;
-    }
-    if (!URL_REGEX.test(destinationUrl)) {
+    } else if (!URL_REGEX.test(destinationUrl)) {
       dispatchToast("This is not a vaid URL", "danger", 5000);
+      return;
+    } else if (productionSiteUrled.hostname === destinationSiteUrled.hostname) {
+      dispatchToast("You cannot shorten this domain", "warning", 5000);
       return;
     }
     const alreadyCreated = Array.isArray(urlData)
@@ -173,10 +177,10 @@ export default function Home() {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-200 p-2">
-                        <button onClick={() => handleCopyUrl(urlItem)}>
+                        <button onClick={() => handleCopyUrl(urlItem)} title="Copy to clipboard">
                           <ClipboardIcon />
                         </button>
-                        <button onClick={() => handleOpenQRCodeModal(urlItem)}>
+                        <button onClick={() => handleOpenQRCodeModal(urlItem)} title="Show QR Code">
                           <QRCodeIcon />
                         </button>
                       </div>

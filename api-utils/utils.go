@@ -22,8 +22,8 @@ func GoDotEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
-const productionSiteUrl = "https://nolongr.vercel.app/"
-const firebaseProjectId = "nolongr-xurifyteine"
+const PRODUCTION_SITE_URL = "https://nolongr.vercel.app/"
+const FIREBASEPROJECTID = "nolongr-xurifyteine"
 
 type cryptoSource struct{}
 

@@ -5,18 +5,22 @@ import { ToastNotificationProps, ToastNotificationType } from "../components/Toa
 export const ToastProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [state, setState] = React.useState<ToastNotificationProps | null>(null);
+  const [toasts, setToasts] = React.useState<ToastNotificationProps[]>([]);
 
   const handleSetState = (message: string, type: ToastNotificationType, duration = 5000) => {
-    setState({ message, type, duration });
+    const prevId = toasts.length ? toasts[toasts.length - 1].id : 0;
+    setToasts([...(toasts ?? []), { message, type, duration, id: prevId + 1 }]);
   };
 
-  const handleDismissToast = () => setState(null);
+  const handleDismissToast = (id: number) => {
+    const newToasts = toasts.filter((toast) => toast.id !== id);
+    setToasts(newToasts);
+  };
 
   return (
     <ToastContext.Provider
       value={{
-        state,
+        state: toasts,
         dispatchToast: handleSetState,
         dismissToast: handleDismissToast,
       }}

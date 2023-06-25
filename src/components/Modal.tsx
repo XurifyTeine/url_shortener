@@ -20,8 +20,8 @@ export const Modal: React.FC<ModalProps> = ({
   const { dismissModal } = useModal();
   const id = `modal-${type}`;
   const modalContents = {
-    hasBody: "flex items-center justify-between p-3 border-b rounded-t",
-    noBody: "flex items-center justify-between p-3 rounded-t",
+    hasBody: "flex items-center justify-between p-3 border-b rounded-t bg-brand-green-300",
+    noBody: "flex items-center justify-between p-3 rounded-t bg-brand-green-300",
   };
   const handleClose = () => dismissModal();
   return (
@@ -36,7 +36,7 @@ export const Modal: React.FC<ModalProps> = ({
             <h3 className="text-xl font-medium text-gray-900">{title}</h3>
             <button
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+              className="text-black bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
               data-modal-hide="small-modal"
               onClick={handleClose}
             >

@@ -9,28 +9,32 @@ export type ToastNotificationType =
   | "copy";
 
 export interface ToastNotificationProps {
+  id: number;
   message: string;
   type: ToastNotificationType;
   duration: number;
 }
 
 export const ToastNotification: React.FC<ToastNotificationProps> = ({
+  id,
   message,
   type,
   duration = 5000,
 }) => {
+  const { dismissToast, state: toastsState } = useToast();
+  const firstToast = toastsState?.[0];
+  const marginTop = id === firstToast.id ? "mt-0" : `mt-[-3rem]`;
   const defaultClassName =
-    "animate-slide-in fixed top-2 right-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow";
+    `animate-slide-in ${marginTop} relative right-2 top-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow`;
   const [className, setClassName] = React.useState(defaultClassName);
-  const { dismissToast } = useToast();
-  const id = `toast-${type}`;
+  const toastType = `toast-${type}`;
 
   const handleDismissToast = React.useCallback(() => {
     setClassName(`${defaultClassName} animate-slide-out`);
     setTimeout(() => {
-      dismissToast();
+      dismissToast(id);
     }, 400);
-  }, [dismissToast]);
+  }, [dismissToast, id]);
 
   React.useEffect(() => {
     const timeout = setTimeout(() => {
@@ -54,7 +58,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
     );
 
   return (
-    <div id={id} className={className} role="alert">
+    <div id={toastType} className={className} role="alert">
       {icon}
       <div className="ml-3 text-sm font-normal">{message}</div>
       <button

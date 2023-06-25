@@ -1,12 +1,13 @@
 import React from "react";
 import { Nunito } from "next/font/google";
 
-import ToastNotification from "@/src/components/ToastNotification";
 import { useToast } from "@/src/context/ToastContext";
+import { useModal } from "@/src/context/ModalContext";
+
 import ErrorBoundary from "./ErrorBoundary";
 import PageHead from "./PageHead";
 import Modal from "./Modal";
-import { useModal } from "../context/ModalContext";
+import StackableToasts from "./StackableToasts";
 
 const inter = Nunito({
   subsets: ["latin"],
@@ -15,7 +16,7 @@ const inter = Nunito({
 });
 
 export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { state: toastState } = useToast();
+  const { state: toastsState } = useToast();
   const { state: modalState } = useModal();
 
   return (
@@ -24,13 +25,7 @@ export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
       <ErrorBoundary name="global">
         <div style={inter.style}>{children}</div>
       </ErrorBoundary>
-      {toastState && (
-        <ToastNotification
-          message={toastState.message}
-          type={toastState.type}
-          duration={toastState.duration}
-        />
-      )}
+      <StackableToasts toastsState={toastsState} />
       {modalState && <Modal title={modalState.title} body={modalState.body} />}
     </>
   );

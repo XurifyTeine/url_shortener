@@ -34,15 +34,16 @@ export default function Home() {
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
-    const productionSiteUrled = new URL(PRODUCTION_SITE_URL);
-    const destinationSiteUrled = new URL(destinationUrl);
     if (destinationUrl.trim() === "") {
       dispatchToast("Please enter in a URL", "warning", 5000);
       return;
     } else if (!URL_REGEX.test(destinationUrl)) {
       dispatchToast("This is not a vaid URL", "danger", 5000);
       return;
-    } else if (productionSiteUrled.hostname === destinationSiteUrled.hostname) {
+    }
+    const productionSiteUrled = new URL(PRODUCTION_SITE_URL);
+    const destinationSiteUrled = new URL(destinationUrl);
+    if (productionSiteUrled.hostname === destinationSiteUrled.hostname) {
       dispatchToast("You cannot shorten this domain", "warning", 5000);
       return;
     }
@@ -118,7 +119,7 @@ export default function Home() {
       <h1 className="text-white text-4xl uppercase mb-5 font-bold">
         URL Shortener
       </h1>
-      <div className="items-center justify-center rounded-sm w-full md:max-w-xl p-6 min-h-32 bg-brand-green-300 shadow">
+      <div className="items-center justify-center rounded-sm w-full md:max-w-xl p-6 bg-brand-green-300 shadow">
         <form className="flex flex-col items-center justify-center w-full">
           <label
             className="mr-2 text-black mb-2 text-xl uppercase font-semibold text-brand-dark-green-200"

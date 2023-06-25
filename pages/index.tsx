@@ -6,7 +6,7 @@ import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard, useLocalStorage } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 
-import { BASE_URL, URL_REGEX } from "@/src/constants";
+import { URL_REGEX } from "@/src/constants";
 import { URLData, URLDataNextAPI } from "@/src/interfaces";
 
 import LoadingIcon from "@/src/components/Icons/LoadingIcon";
@@ -30,6 +30,8 @@ export default function Home() {
   const [, copy] = useCopyToClipboard();
   const { Canvas: QRCodeCanvas } = useQRCode();
 
+  const BASE_URL = process.env.NODE_ENV !== "production" ? process.env.PRODUCTION_SITE_URL : "http://localhost:3000/api"
+
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -51,9 +53,8 @@ export default function Home() {
     }
     if (isLoading) return;
     setIsLoading(true);
-    console.log('BASE_URL', BASE_URL, `${BASE_URL}/create-short-url?url=${destinationUrl}`);
     const response = await fetch(
-      `${BASE_URL}/create-short-url?url=${destinationUrl}`,
+      `/api/create-short-url?url=${destinationUrl}`,
       {
         headers: {
           Accept: "application/json",

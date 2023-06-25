@@ -110,11 +110,11 @@ export default function Home() {
   }
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center p-2 bg-brand-green-200 pt-32">
+    <main className="relative min-h-screen flex flex-col items-center p-2 bg-brand-green-200 pt-32">
       <h1 className="text-white text-4xl uppercase mb-5 font-bold">
         URL Shortener
       </h1>
-      <div className="items-center justify-center rounded-sm w-full md:max-w-lg p-6 min-h-32 bg-brand-green-300 shadow">
+      <div className="items-center justify-center rounded-sm w-full md:max-w-xl p-6 min-h-32 bg-brand-green-300 shadow">
         <form className="flex flex-col items-center justify-center w-full">
           <label
             className="mr-2 text-black mb-2 text-xl uppercase font-semibold text-brand-dark-green-200"
@@ -166,7 +166,7 @@ export default function Home() {
                         <span className="flex">
                           <span className="mr-1.5">Destination:</span>
                           <input
-                            className="break-all w-full px-1 bg-white text-gray-500 rounded-sm"
+                            className="break-all w-full px-1 bg-brand-green-400 text-gray-500 rounded-sm"
                             defaultValue={urlItem.destination}
                             disabled={true}
                           />

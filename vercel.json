@@ -7,6 +7,12 @@
       "destination": "/api/entrypoint.go"
     }
   ],
+  "functions": {
+    "api/healthz.go": {
+      "memory": 512,
+      "maxDuration": 5
+    }
+  },
   "headers": [
     {
       "source": "/service-worker.js",

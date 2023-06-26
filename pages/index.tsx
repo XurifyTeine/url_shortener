@@ -36,7 +36,7 @@ export default function Home() {
   const [destinationUrl, setDestinationUrl] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const { dispatchToast } = useToast();

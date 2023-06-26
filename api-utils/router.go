@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -23,6 +24,8 @@ func RegisterRouter(router *gin.RouterGroup) {
 	router.GET("/api/urls/:id", handleRouteFindURLById)
 	router.GET("/api/new-short-id", handleRouteGetNewShortId)
 	router.POST("/api/create-short-url", handleRouteCreateShortUrl)
+	router.DELETE("/api/delete-expired-ids", handleDeleteExpiredIds)
+	router.DELETE("/api/delete-id", handleDeleteId)
 }
 
 func RegisterCors(router *gin.Engine) {
@@ -88,6 +91,10 @@ func handleRouteGetNewShortId(context *gin.Context) {
 
 func handleRouteCreateShortUrl(context *gin.Context) {
 	destination := context.Query("url")
+	self_destruct_string := context.Query("self_destruct")
+
+	self_destruct, err := strconv.ParseInt(self_destruct_string, 10, 64)
+	log.Println(self_destruct_string, self_destruct, "SELF_DEST")
 
 	destinationSiteUrled, err := url.Parse(destination)
 	productionSiteUrled, err := url.Parse(PRODUCTION_SITE_URL)
@@ -109,7 +116,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		return
 	}
 
-	urlData, err := addURLToFirestore(destination)
+	urlData, err := addURLToFirestore(destination, self_destruct)
 	if err != nil {
 		errorMessage := ErrorResponse{
 			Message:   "Failed to create short URL",
@@ -121,4 +128,23 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 	} else {
 		context.JSON(http.StatusOK, map[string]interface{}{"result": urlData})
 	}
+}
+
+func handleDeleteExpiredIds(context *gin.Context) {
+	getAllFromFirestore()
+}
+
+func handleDeleteId(context *gin.Context) {
+	id := context.Query("id")
+	res, err := deleteFromFirestore(id)
+	if err != nil {
+		errorMessage := ErrorResponse{
+			Message:   "Failed to delete from Firestore",
+			Error:     err.Error(),
+			ErrorCode: http.StatusNotFound,
+		}
+		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
+		log.Println(err)
+	}
+	context.JSON(http.StatusOK, map[string]interface{}{"result": res})
 }

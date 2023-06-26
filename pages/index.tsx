@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQRCode } from "next-qrcode";
 
 import { useToast } from "@/src/context/ToastContext";
@@ -21,10 +21,22 @@ const ClientOnly = React.lazy(() =>
   }))
 );
 
+const DatePicker = React.lazy(() =>
+  import("react-datepicker").then((module) => ({
+    default: module.default,
+  }))
+);
+
+import "react-datepicker/dist/react-datepicker.css";
+
 export default function Home() {
   const [urlData, setUrlData] = useLocalStorage<URLData[]>("urls", []);
-  const [destinationUrl, setDestinationUrl] = React.useState<string>("");
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [destinationUrl, setDestinationUrl] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   const { dispatchToast } = useToast();
   const { dispatchModal } = useModal();
   const [, copy] = useCopyToClipboard();
@@ -56,16 +68,18 @@ export default function Home() {
     }
     if (isLoading) return;
     setIsLoading(true);
-    const response = await fetch(
-      `/api/create-short-url?url=${destinationUrl}`,
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-      }
-    );
+    const selfDestructDate = new Date().getTime();
+    const url = selfDestructDate
+      ? `/api/create-short-url?url=${destinationUrl}&self_destruct=${selfDestructDate}`
+      : `/api/create-short-url?url=${destinationUrl}`;
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({ self_destruct: selfDestructDate }),
+    });
     const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;
 
@@ -92,6 +106,11 @@ export default function Home() {
     setDestinationUrl(value);
   };
 
+  const handleOnChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+  };
+
   const handleCopyUrl = async (urlItem: URLData) => {
     const url = urlItem.url;
     if (url) {
@@ -109,10 +128,34 @@ export default function Home() {
     );
   };
 
-  const handleDeleteShortUrl = (urlItem: URLData) => {
-    console.log('urlItem', urlItem);
-    dispatchToast("Not implemented yet 🤫", "warning");
-  }
+  const handleDeleteShortUrl = async (urlItem: URLData) => {
+    //dispatchToast("Not implemented yet 🤫", "warning");
+
+    const response = await fetch(`/api/delete-id?id=${urlItem.id}`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "DELETE",
+    });
+    const result: URLDataNextAPI = await response.json();
+    const data = result?.result as URLData;
+    if (data) {
+      const newUrlData = urlData.filter((item) => item.id !== urlItem.id);
+      setUrlData(newUrlData);
+    }
+    console.log("urlItem", urlItem, data);
+  };
+
+  const handleDateChange = (newSelectedDate: Date) => {
+    console.log(newSelectedDate);
+    setSelectedDate(newSelectedDate);
+  };
+
+  const handleToggleShowAdvanced = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setShowAdvanced(!showAdvanced);
+  };
 
   return (
     <main className="relative min-h-screen flex flex-col items-center p-2 bg-brand-green-200 pt-32">
@@ -131,7 +174,7 @@ export default function Home() {
             <div className="w-full relative">
               <ErrorBoundary name="url-input">
                 <input
-                  className="h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
+                  className="caret-zinc-900 h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
                   value={destinationUrl}
                   onChange={handleOnChangeDestinationUrl}
                   id="url"
@@ -148,6 +191,41 @@ export default function Home() {
               {isLoading ? "Loading..." : "Shorten URL"}
             </button>
           </span>
+          <div className="mt-2 w-full">
+            <button
+              className="bg-brand-grayish-green-300 w-32 px-2 py-0.5 rounded-sm flex items-center justify-between"
+              onClick={handleToggleShowAdvanced}
+            >
+              Advanced{" "}
+              <span className={showAdvanced ? "rotate-180" : undefined}>
+                <ChevronIcon />
+              </span>
+            </button>
+            {showAdvanced && (
+              <div className="w-full flex mt-2">
+                <div className="text-black">
+                  <React.Suspense>
+                    <DatePicker
+                      onChange={handleDateChange}
+                      selected={selectedDate}
+                      className="px-2 py-1 rounded-sm text-gray-600 w-48"
+                      showTimeSelect={true}
+                      dateFormat="dd-MM-yyyy hh:mm a"
+                      placeholderText="Self-destruct date"
+                    />
+                  </React.Suspense>
+                </div>
+                <input
+                  className="h-8 py-2 px-3 ml-2 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
+                  value={password}
+                  onChange={handleOnChangePassword}
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                />
+              </div>
+            )}
+          </div>
         </form>
         <React.Suspense>
           <ClientOnly>
@@ -156,7 +234,7 @@ export default function Home() {
               urlData.map((urlItem) => (
                 <ErrorBoundary name="url-list" key={urlItem.id}>
                   <div className="flex mt-2">
-                    <div className="result-box flex w-full bg-brand-grayish-green-100 rounded-sm">
+                    <div className="result-box flex w-full bg-brand-grayish-green-200 rounded-sm">
                       <div className="flex flex-col w-full p-2">
                         <span>
                           <span className="mr-1.5">Click to visit:</span>
@@ -177,16 +255,25 @@ export default function Home() {
                           />
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-200 p-2">
-                        <button onClick={() => handleCopyUrl(urlItem)} title="Copy to clipboard">
+                      <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-100 p-2">
+                        <button
+                          onClick={() => handleCopyUrl(urlItem)}
+                          title="Copy to clipboard"
+                        >
                           <ClipboardIcon />
                         </button>
-                        <button onClick={() => handleOpenQRCodeModal(urlItem)} title="Show QR Code">
+                        <button
+                          onClick={() => handleOpenQRCodeModal(urlItem)}
+                          title="Show QR Code"
+                        >
                           <QRCodeIcon />
                         </button>
                       </div>
                     </div>
-                    <button className="ml-1.5 px-1 bg-light-danger hover:bg-red-500" onClick={() => handleDeleteShortUrl(urlItem)}>
+                    <button
+                      className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
+                      onClick={() => handleDeleteShortUrl(urlItem)}
+                    >
                       <TrashIcon />
                     </button>
                   </div>
@@ -204,5 +291,17 @@ export default function Home() {
       </div>
       <GitHubLink />
     </main>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      className="w-6 h-6"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+    >
+      <path d="M12 8l6 6H6l6-6z" fill="#FFFFFF"></path>
+    </svg>
   );
 }

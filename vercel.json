@@ -13,6 +13,12 @@
       "maxDuration": 5
     }
   },
+  "crons": [
+    {
+      "path": "/api/delete-expired-ids",
+      "schedule": "0 1 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/service-worker.js",

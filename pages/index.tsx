@@ -196,7 +196,7 @@ export default function Home() {
           </span>
           <div className="mt-2 w-full">
             <button
-              className="bg-brand-grayish-green-300 w-32 px-2 py-0.5 rounded-sm flex items-center justify-between"
+              className="bg-brand-grayish-green-300 text-white w-32 px-2 py-0.5 rounded-sm flex items-center justify-between"
               onClick={handleToggleShowAdvanced}
             >
               Advanced{" "}

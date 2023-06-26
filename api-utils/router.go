@@ -92,9 +92,7 @@ func handleRouteGetNewShortId(context *gin.Context) {
 func handleRouteCreateShortUrl(context *gin.Context) {
 	destination := context.Query("url")
 	self_destruct_string := context.Query("self_destruct")
-
 	self_destruct, err := strconv.ParseInt(self_destruct_string, 10, 64)
-	log.Println(self_destruct_string, self_destruct, "SELF_DEST")
 
 	destinationSiteUrled, err := url.Parse(destination)
 	productionSiteUrled, err := url.Parse(PRODUCTION_SITE_URL)

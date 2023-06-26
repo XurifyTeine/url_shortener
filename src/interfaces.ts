@@ -3,6 +3,7 @@ export interface URLData {
   id: string;
   date_created: string;
   url: string;
+  self_destruct: number;
 }
 
 export interface URLError {

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useQRCode } from "next-qrcode";
+import setHours from "date-fns/setHours";
+import setMinutes from "date-fns/setMinutes";
 
 import { useToast } from "@/src/context/ToastContext";
 import { useModal } from "@/src/context/ModalContext";
@@ -42,6 +44,10 @@ export default function Home() {
   const [, copy] = useCopyToClipboard();
   const { Canvas: QRCodeCanvas } = useQRCode();
 
+  const currentDate = new Date();
+  const SECONDS = 60000;
+  const startDate = new Date(currentDate.getTime() + SECONDS * 10);
+
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -68,9 +74,8 @@ export default function Home() {
     }
     if (isLoading) return;
     setIsLoading(true);
-    const selfDestructDate = new Date().getTime();
-    const url = selfDestructDate
-      ? `/api/create-short-url?url=${destinationUrl}&self_destruct=${selfDestructDate}`
+    const url = selectedDate
+      ? `/api/create-short-url?url=${destinationUrl}&self_destruct=${selectedDate.getTime()}`
       : `/api/create-short-url?url=${destinationUrl}`;
     const response = await fetch(url, {
       headers: {
@@ -78,7 +83,6 @@ export default function Home() {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({ self_destruct: selfDestructDate }),
     });
     const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;
@@ -93,6 +97,7 @@ export default function Home() {
         destination: data.destination,
         id: data.id,
         url: `${window.location.origin}/${data.id}`,
+        self_destruct: data.self_destruct,
       };
       setUrlData([...(urlData ?? []), newUrlData]);
       setIsLoading(false);
@@ -144,11 +149,9 @@ export default function Home() {
       const newUrlData = urlData.filter((item) => item.id !== urlItem.id);
       setUrlData(newUrlData);
     }
-    console.log("urlItem", urlItem, data);
   };
 
   const handleDateChange = (newSelectedDate: Date) => {
-    console.log(newSelectedDate);
     setSelectedDate(newSelectedDate);
   };
 
@@ -211,7 +214,11 @@ export default function Home() {
                       className="px-2 py-1 rounded-sm text-gray-600 w-48"
                       showTimeSelect={true}
                       dateFormat="dd-MM-yyyy hh:mm a"
+                      onFocus={() => null}
                       placeholderText="Self-destruct date"
+                      minDate={startDate}
+                      minTime={currentDate}
+                      maxTime={setHours(setMinutes(new Date(), 59), 23)}
                     />
                   </React.Suspense>
                 </div>

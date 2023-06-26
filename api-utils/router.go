@@ -23,9 +23,10 @@ type ErrorResponse struct {
 func RegisterRouter(router *gin.RouterGroup) {
 	router.GET("/api/urls/:id", handleRouteFindURLById)
 	router.GET("/api/new-short-id", handleRouteGetNewShortId)
+	router.GET("/api/get-expired-documents", handleRouteGetAllExpiredDocumentsFromFirestore)
 	router.POST("/api/create-short-url", handleRouteCreateShortUrl)
-	router.DELETE("/api/delete-expired-ids", handleDeleteExpiredIds)
-	router.DELETE("/api/delete-id", handleDeleteId)
+	router.DELETE("/api/delete-id", handleRouteDeleteId)
+	router.DELETE("/api/delete-expired-ids", handleRouteDeleteExpiredDocuments)
 }
 
 func RegisterCors(router *gin.Engine) {
@@ -128,11 +129,15 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 	}
 }
 
-func handleDeleteExpiredIds(context *gin.Context) {
-	getAllFromFirestore()
+func handleRouteDeleteExpiredDocuments(context *gin.Context) {
+	firestoreSnapshots, err := deleteAllExpiredDocumentsFromFirestore()
+	if err != nil {
+		log.Println("handleRouteDeleteExpiredIds error:", err)
+	}
+	context.JSON(http.StatusOK, map[string]interface{}{"result": firestoreSnapshots})
 }
 
-func handleDeleteId(context *gin.Context) {
+func handleRouteDeleteId(context *gin.Context) {
 	id := context.Query("id")
 	res, err := deleteFromFirestore(id)
 	if err != nil {
@@ -145,4 +150,12 @@ func handleDeleteId(context *gin.Context) {
 		log.Println(err)
 	}
 	context.JSON(http.StatusOK, map[string]interface{}{"result": res})
+}
+
+func handleRouteGetAllExpiredDocumentsFromFirestore(context *gin.Context) {
+	firestoreSnapshots, err := getAllExpiredDocumentsFromFirestore()
+	if err != nil {
+		log.Println("handleRouteGetAllExpiredDocumentsFromFirestore error:", err)
+	}
+	context.JSON(http.StatusOK, map[string]interface{}{"result": firestoreSnapshots})
 }

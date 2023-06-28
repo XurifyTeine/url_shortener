@@ -20,7 +20,6 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       return { notFound: true };
     } else if (data && data.error) {
       const error = {
-        data,
         error: data.error,
         url,
       };

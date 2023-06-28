@@ -196,12 +196,12 @@ export default function Home() {
               </span>
             </button>
             {showAdvanced && (
-              <div className="w-full flex mt-2">
+              <div className="w-full flex flex-col sm:flex-row mt-2 gap-2">
                 <div className="text-black">
                   <select
                     id="durations"
                     onChange={handleDurationChange}
-                    className="bg-gray-50 px-2 w-36 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full h-full"
+                    className="bg-gray-50 px-2 w-full sm:w-40 h-8 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block"
                   >
                     {
                       selfDestructDurations.map((duration) => (
@@ -211,7 +211,7 @@ export default function Home() {
                   </select>
                 </div>
                 <input
-                  className="h-8 py-2 px-3 ml-2 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
+                  className="h-8 py-2 px-3 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
                   value={password}
                   onChange={handleOnChangePassword}
                   id="password"

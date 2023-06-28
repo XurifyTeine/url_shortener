@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { useQRCode } from "next-qrcode";
-import setHours from "date-fns/setHours";
-import setMinutes from "date-fns/setMinutes";
 
 import { useToast } from "@/src/context/ToastContext";
 import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard, useLocalStorage } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 
-import { PRODUCTION_SITE_URL, SIXTY_SECONDS, URL_REGEX, selfDestructDurations } from "@/src/constants";
+import { PRODUCTION_SITE_URL, URL_REGEX, selfDestructDurations } from "@/src/constants";
 import { URLData, URLDataNextAPI } from "@/src/interfaces";
 
 import LoadingIcon from "@/src/components/Icons/LoadingIcon";
@@ -22,14 +20,6 @@ const ClientOnly = React.lazy(() =>
     default: module.ClientOnly,
   }))
 );
-
-const DatePicker = React.lazy(() =>
-  import("react-datepicker").then((module) => ({
-    default: module.default,
-  }))
-);
-
-import "react-datepicker/dist/react-datepicker.css";
 
 export default function Home() {
   const [urlData, setUrlData] = useLocalStorage<URLData[]>("urls", []);
@@ -135,8 +125,6 @@ export default function Home() {
   };
 
   const handleDeleteShortUrl = async (urlItem: URLData) => {
-    //dispatchToast("Not implemented yet 🤫", "warning");
-
     const response = await fetch(`/api/delete-url?id=${urlItem.id}`, {
       headers: {
         Accept: "application/json",

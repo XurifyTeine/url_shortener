@@ -23,7 +23,8 @@ func GoDotEnvVariable(key string) string {
 }
 
 const PRODUCTION_SITE_URL = "https://nolongr.vercel.app/"
-const FIREBASEPROJECTID = "nolongr-xurifyteine"
+
+//const FIREBASEPROJECTID = "nolongr-xurifyteine"
 
 type cryptoSource struct{}
 

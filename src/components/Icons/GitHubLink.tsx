@@ -1,6 +1,4 @@
-import React from "react";
-
-export const GitHubLink: React.FC = () => {
+const GitHubLink: React.FC = () => {
   return (
     <a
       aria-label="Click to view the GitHub repo"

@@ -1,4 +1,4 @@
-export const CloseIcon = () => (
+const CloseIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="w-5 h-5"

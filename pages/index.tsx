@@ -14,6 +14,7 @@ import ClipboardIcon from "@/src/components/Icons/ClipboardIcon";
 import QRCodeIcon from "@/src/components/Icons/QRCodeIcon";
 import GitHubLink from "@/src/components/Icons/GitHubLink";
 import TrashIcon from "@/src/components/Icons/TrashIcon";
+import ChevronIcon from "@/src/components/Icons/ChevronIcon";
 
 const ClientOnly = React.lazy(() =>
   import("@/src/components/ClientOnly").then((module) => ({
@@ -285,17 +286,5 @@ export default function Home() {
       </div>
       <GitHubLink />
     </main>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg
-      className="w-6 h-6"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 8l6 6H6l6-6z" fill="#FFFFFF"></path>
-    </svg>
   );
 }

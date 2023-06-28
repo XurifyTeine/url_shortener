@@ -1,6 +1,4 @@
-import React from "react";
-
-export const LoadingIcon: React.FC = () => {
+const LoadingIcon: React.FC = () => {
   return (
     <svg
       className="animate-spin h-5 w-5 mr-2"

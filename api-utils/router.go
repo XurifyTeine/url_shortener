@@ -22,11 +22,13 @@ type ErrorResponse struct {
 
 func RegisterRouter(router *gin.RouterGroup) {
 	router.GET("/api/urls/:id", handleRouteFindURLById)
+	router.POST("/api/urls", handleRouteCreateShortUrl)
+	router.DELETE("/api/delete-url", handleRouteDeleteId)
+	router.DELETE("/api/delete-expired-ids", handleRouteDeleteExpiredIds)
+	//ADMIN
+	router.GET("/api/urls", handleRouteGetAllUrls)
+	router.GET("/api/expired-urls", handleRouteGetAllExpiredUrls)
 	router.GET("/api/new-short-id", handleRouteGetNewShortId)
-	router.GET("/api/get-expired-documents", handleRouteGetAllExpiredDocumentsFromFirestore)
-	router.POST("/api/create-short-url", handleRouteCreateShortUrl)
-	router.DELETE("/api/delete-id", handleRouteDeleteId)
-	router.DELETE("/api/delete-expired-ids", handleRouteDeleteExpiredDocuments)
 }
 
 func RegisterCors(router *gin.Engine) {
@@ -55,22 +57,6 @@ func RegisterCors(router *gin.Engine) {
 
 }
 
-func handleRouteFindURLById(context *gin.Context) {
-	id := context.Param("id")
-	urlData, err := retrieveDestinationUrl(id)
-	if err != nil {
-		errorMessage := ErrorResponse{
-			Message:   "This URL is invalid or a destination URL could not be found",
-			Error:     err.Error(),
-			ErrorCode: http.StatusNotFound,
-			Id:        id,
-		}
-		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
-	} else {
-		context.JSON(http.StatusOK, map[string]interface{}{"result": urlData})
-	}
-}
-
 func handleRouteGetNewShortId(context *gin.Context) {
 	id := context.Query("id")
 
@@ -90,12 +76,28 @@ func handleRouteGetNewShortId(context *gin.Context) {
 	context.JSON(http.StatusOK, urlData)
 }
 
-func handleRouteCreateShortUrl(context *gin.Context) {
-	destination := context.Query("url")
-	self_destruct_string := context.Query("self_destruct")
-	self_destruct, err := strconv.ParseInt(self_destruct_string, 10, 64)
+func handleRouteFindURLById(context *gin.Context) {
+	id := context.Param("id")
+	urlData, err := GetSingleUrl(id)
+	if err != nil {
+		errorMessage := ErrorResponse{
+			Message:   "This URL is invalid or a destination URL could not be found",
+			Error:     err.Error(),
+			ErrorCode: http.StatusNotFound,
+			Id:        id,
+		}
+		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
+	} else {
+		context.JSON(http.StatusOK, map[string]URLData{"result": urlData})
+	}
+}
 
-	destinationSiteUrled, err := url.Parse(destination)
+func handleRouteCreateShortUrl(context *gin.Context) {
+	destination := context.Query("destination")
+	selfDestructString := context.Query("self_destruct")
+	selfDestruct, _ := strconv.ParseInt(selfDestructString, 10, 64)
+
+	destinationSiteUrled, _ := url.Parse(destination)
 	productionSiteUrled, err := url.Parse(PRODUCTION_SITE_URL)
 	errorMessageIncorrectUrl := ErrorResponse{
 		Message:   "A URL was not provided or the input was incorrect",
@@ -115,7 +117,10 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		return
 	}
 
-	urlData, err := addURLToFirestore(destination, self_destruct)
+	//urlData, err := addURLToFirestore(destination, self_destruct)
+
+	urlData, err := CreateUrl(destination, selfDestruct)
+
 	if err != nil {
 		errorMessage := ErrorResponse{
 			Message:   "Failed to create short URL",
@@ -125,37 +130,45 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
 		log.Println(err)
 	} else {
-		context.JSON(http.StatusOK, map[string]interface{}{"result": urlData})
+		context.JSON(http.StatusOK, map[string]URLData{"result": urlData})
 	}
 }
 
-func handleRouteDeleteExpiredDocuments(context *gin.Context) {
-	firestoreSnapshots, err := deleteAllExpiredDocumentsFromFirestore()
+func handleRouteGetAllUrls(context *gin.Context) {
+	urls, err := GetUrls()
 	if err != nil {
-		log.Println("handleRouteDeleteExpiredIds error:", err)
+		log.Println("(handleRouteGetAllUrls) error:", err)
 	}
-	context.JSON(http.StatusOK, map[string]interface{}{"result": firestoreSnapshots})
+	context.JSON(http.StatusOK, map[string][]URLData{"result": urls})
+}
+
+func handleRouteGetAllExpiredUrls(context *gin.Context) {
+	urls, err := GetAllExpiredUrls()
+	if err != nil {
+		log.Println("(handleRouteGetAllExpiredUrls) error:", err)
+	}
+	context.JSON(http.StatusOK, map[string][]URLData{"result": urls})
+}
+
+func handleRouteDeleteExpiredIds(context *gin.Context) {
+	ids, err := deleteAllExpiredDocumentsFromFirestore()
+	if err != nil {
+		log.Println("(handleRouteDeleteExpiredIds) error:", err)
+	}
+	context.JSON(http.StatusOK, map[string][]string{"result": ids})
 }
 
 func handleRouteDeleteId(context *gin.Context) {
 	id := context.Query("id")
-	res, err := deleteFromFirestore(id)
+	result, err := DeleteFromDatabase(id)
 	if err != nil {
 		errorMessage := ErrorResponse{
-			Message:   "Failed to delete from Firestore",
+			Message:   "Failed to delete from database",
 			Error:     err.Error(),
 			ErrorCode: http.StatusNotFound,
 		}
 		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
-		log.Println(err)
+		log.Println("(handleRouteDeleteId) error: ", err)
 	}
-	context.JSON(http.StatusOK, map[string]interface{}{"result": res})
-}
-
-func handleRouteGetAllExpiredDocumentsFromFirestore(context *gin.Context) {
-	firestoreSnapshots, err := getAllExpiredDocumentsFromFirestore()
-	if err != nil {
-		log.Println("handleRouteGetAllExpiredDocumentsFromFirestore error:", err)
-	}
-	context.JSON(http.StatusOK, map[string]interface{}{"result": firestoreSnapshots})
+	context.JSON(http.StatusOK, map[string]interface{}{"result": result})
 }

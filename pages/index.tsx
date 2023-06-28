@@ -8,7 +8,7 @@ import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard, useLocalStorage } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 
-import { PRODUCTION_SITE_URL, URL_REGEX } from "@/src/constants";
+import { PRODUCTION_SITE_URL, SIXTY_SECONDS, URL_REGEX, selfDestructDurations } from "@/src/constants";
 import { URLData, URLDataNextAPI } from "@/src/interfaces";
 
 import LoadingIcon from "@/src/components/Icons/LoadingIcon";
@@ -37,16 +37,12 @@ export default function Home() {
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<string | number>("");
 
   const { dispatchToast } = useToast();
   const { dispatchModal } = useModal();
   const [, copy] = useCopyToClipboard();
   const { Canvas: QRCodeCanvas } = useQRCode();
-
-  const currentDate = new Date();
-  const SECONDS = 60000;
-  const startDate = new Date(currentDate.getTime() + SECONDS * 10);
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -74,9 +70,10 @@ export default function Home() {
     }
     if (isLoading) return;
     setIsLoading(true);
-    const url = selectedDate
-      ? `/api/create-short-url?url=${destinationUrl}&self_destruct=${selectedDate.getTime()}`
-      : `/api/create-short-url?url=${destinationUrl}`;
+
+    const url = selectedDuration
+      ? `/api/urls?destination=${destinationUrl}&self_destruct=${selectedDuration}`
+      : `/api/urls?destination=${destinationUrl}`;
     const response = await fetch(url, {
       headers: {
         Accept: "application/json",
@@ -88,7 +85,11 @@ export default function Home() {
     const data = result?.result as URLData;
 
     if (result?.error) {
-      dispatchToast(result.error, "danger", 7000);
+      const toastText =
+        typeof result.error === "string"
+          ? result.error
+          : "Creating Short URL Error";
+      dispatchToast(toastText, "danger", 7000);
       console.error("Creating Short URL Error:", result.error);
       setIsLoading(false);
     } else if (data) {
@@ -136,7 +137,7 @@ export default function Home() {
   const handleDeleteShortUrl = async (urlItem: URLData) => {
     //dispatchToast("Not implemented yet 🤫", "warning");
 
-    const response = await fetch(`/api/delete-id?id=${urlItem.id}`, {
+    const response = await fetch(`/api/delete-url?id=${urlItem.id}`, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -151,8 +152,9 @@ export default function Home() {
     }
   };
 
-  const handleDateChange = (newSelectedDate: Date) => {
-    setSelectedDate(newSelectedDate);
+  const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newDuration = e.target.value;
+    setSelectedDuration(newDuration);
   };
 
   const handleToggleShowAdvanced = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -207,20 +209,17 @@ export default function Home() {
             {showAdvanced && (
               <div className="w-full flex mt-2">
                 <div className="text-black">
-                  <React.Suspense>
-                    <DatePicker
-                      onChange={handleDateChange}
-                      selected={selectedDate}
-                      className="px-2 py-1 rounded-sm text-gray-600 w-48"
-                      showTimeSelect={true}
-                      dateFormat="dd-MM-yyyy hh:mm a"
-                      onFocus={() => null}
-                      placeholderText="Self-destruct date"
-                      minDate={startDate}
-                      minTime={currentDate}
-                      maxTime={setHours(setMinutes(new Date(), 59), 23)}
-                    />
-                  </React.Suspense>
+                  <select
+                    id="durations"
+                    onChange={handleDurationChange}
+                    className="bg-gray-50 px-2 w-36 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full h-full"
+                  >
+                    {
+                      selfDestructDurations.map((duration) => (
+                        <option key={duration.label} value={duration.value}>{duration.label}</option>
+                      ))
+                    }
+                  </select>
                 </div>
                 <input
                   className="h-8 py-2 px-3 ml-2 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"

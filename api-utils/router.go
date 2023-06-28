@@ -104,7 +104,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		ErrorCode: http.StatusForbidden,
 	}
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	} else if productionSiteUrled.Hostname() == destinationSiteUrled.Hostname() {
 		context.JSON(http.StatusForbidden, map[string]ErrorResponse{"error": errorMessageIncorrectUrl})
 		return
@@ -151,7 +151,7 @@ func handleRouteGetAllExpiredUrls(context *gin.Context) {
 }
 
 func handleRouteDeleteExpiredIds(context *gin.Context) {
-	ids, err := deleteAllExpiredDocumentsFromFirestore()
+	ids, err := DeleteAllExpiredDocuments()
 	if err != nil {
 		log.Println("(handleRouteDeleteExpiredIds) error:", err)
 	}

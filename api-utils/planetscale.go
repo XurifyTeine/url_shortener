@@ -12,13 +12,13 @@ import (
 func getNewPlanetScaleClient() (*sql.DB, error) {
 	// err := godotenv.Load()
 	// if err != nil {
-	// 	log.Fatal("failed to load env", err)
+	// 	log.Print("failed to load env", err)
 	// }
 
 	// Open a connection to the database
-	db, err := sql.Open("mysql", "dv8dj18swusl5i8qhnh0:pscale_pw_wySxgrT3XxFVvkhw2iwoiYeq3ksbjpWoTrWHtfIfyvz@tcp(aws.connect.psdb.cloud)/nolongr?tls=true")
+	db, err := sql.Open("mysql", "k4ba5lbzm1tm9bnjv8oz:pscale_pw_2KY5ASppqViRVmKQ6xhB51DFQuh5ItS7r8GdPiF2YDj@tcp(aws.connect.psdb.cloud)/nolongr?tls=true")
 	if err != nil {
-		log.Fatal("failed to open db connection", err)
+		log.Print("failed to open db connection", err)
 	}
 
 	return db, err
@@ -60,7 +60,7 @@ func CreateUrl(url string, self_destruct int64) (URLData, error) {
 	_, err = db.Exec(query, newUrlData.ID, newUrlData.Destination, newUrlData.DateCreated, newUrlData.URL, newUrlData.SelfDestruct)
 
 	if err != nil {
-		log.Fatal("(CreateUrl) db.Exec", err)
+		log.Print("(CreateUrl) db.Exec", err)
 	}
 
 	return newUrlData, err
@@ -72,7 +72,7 @@ func GetUrls() ([]URLData, error) {
 	res, err := db.Query(query)
 	defer res.Close()
 	if err != nil {
-		log.Fatal("(GetUrls) db.Query", err)
+		log.Print("(GetUrls) db.Query", err)
 	}
 
 	urls := []URLData{}
@@ -80,7 +80,7 @@ func GetUrls() ([]URLData, error) {
 		var urlData URLData
 		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct)
 		if err != nil {
-			log.Fatal("(GetUrls) res.Scan", err)
+			log.Print("(GetUrls) res.Scan", err)
 		}
 		urls = append(urls, urlData)
 	}
@@ -102,12 +102,12 @@ func GetSingleUrl(id string) (URLData, error) {
 
 func GetAllExpiredUrls() ([]URLData, error) {
 	db, err := getNewPlanetScaleClient()
-	query := "SELECT * FROM urls WHERE self_destruct > ?"
+	query := "SELECT * FROM urls WHERE self_destruct <> '' AND self_destruct < ?"
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	res, err := db.Query(query, timeNow)
 	defer res.Close()
 	if err != nil {
-		log.Fatal("(GetUrls) db.Query", err)
+		log.Print("(GetAllExpiredUrls) db.Query", err)
 	}
 
 	urls := []URLData{}
@@ -115,7 +115,7 @@ func GetAllExpiredUrls() ([]URLData, error) {
 		var urlData URLData
 		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct)
 		if err != nil {
-			log.Fatal("(GetAllExpiredUrls) res.Scan", err)
+			log.Print("(GetAllExpiredUrls) res.Scan", err)
 		}
 		urls = append(urls, urlData)
 	}
@@ -133,6 +133,29 @@ func DeleteFromDatabase(id string) (bool, error) {
 	}
 
 	return true, err
+}
+
+func DeleteAllExpiredDocuments() ([]string, error) {
+	db, err := getNewPlanetScaleClient()
+	query := "DELETE FROM urls WHERE self_destruct < ?"
+	timeNow := time.Now().UTC().Format(time.RFC3339)
+	res, err := db.Query(query, timeNow)
+	defer res.Close()
+	if err != nil {
+		log.Print("(DeleteAllExpiredDocumentsFromFirestore) db.Query", err)
+	}
+
+	urls := []string{}
+	for res.Next() {
+		var urlData URLData
+		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct)
+		if err != nil {
+			log.Print("(DeleteAllExpiredDocumentsFromFirestore) res.Scan", err)
+		}
+		urls = append(urls, urlData.ID)
+	}
+
+	return urls, err
 }
 
 func checkIfUrlIdExists(urlId string) bool {

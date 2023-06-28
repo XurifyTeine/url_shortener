@@ -17,7 +17,7 @@ func GetEnvironment() string {
 func GoDotEnvVariable(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Printf("Error loading .env file")
 	}
 	return os.Getenv(key)
 }
@@ -32,7 +32,7 @@ func (source cryptoSource) Seed(seed int64) {}
 func (source cryptoSource) Uint64() (value uint64) {
 	err := binary.Read(crand.Reader, binary.BigEndian, &value)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	return value
 }

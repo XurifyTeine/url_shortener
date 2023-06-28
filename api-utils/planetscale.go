@@ -2,21 +2,25 @@ package utils
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 func getNewPlanetScaleClient() (*sql.DB, error) {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Print("failed to load env", err)
-	// }
+	err := godotenv.Load()
+	if err != nil {
+		log.Print("failed to load env", err)
+	}
+
+	log.Println("GETENV32", os.Getenv("DSN"))
 
 	// Open a connection to the database
-	db, err := sql.Open("mysql", "k4ba5lbzm1tm9bnjv8oz:pscale_pw_2KY5ASppqViRVmKQ6xhB51DFQuh5ItS7r8GdPiF2YDj@tcp(aws.connect.psdb.cloud)/nolongr?tls=true")
+	db, err := sql.Open("mysql", os.Getenv("DSN"))
 	if err != nil {
 		log.Print("failed to open db connection", err)
 	}

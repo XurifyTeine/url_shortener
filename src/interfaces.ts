@@ -4,6 +4,7 @@ export interface URLData {
   date_created: string;
   url: string;
   self_destruct: number;
+  session_token?: string;
 }
 
 export interface URLError {

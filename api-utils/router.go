@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
@@ -9,7 +10,10 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/segmentio/ksuid"
 	"golang.org/x/exp/slices"
 )
 
@@ -20,15 +24,52 @@ type ErrorResponse struct {
 	Id        string `json:"id"`
 }
 
+func setCookieHandler(context *gin.Context) {
+	session := sessions.Default(context)
+	key := "session_token"
+	sessionToken := session.Get(key)
+	if sessionToken == nil {
+		sessionToken = ksuid.New().String()
+	}
+	session.Set(key, sessionToken)
+	session.Save()
+	result := map[string]interface{}{"key": key, "value": sessionToken}
+	context.JSON(http.StatusOK, map[string]interface{}{"result": result})
+}
+
+func getCookieHandler(context *gin.Context) {
+	cookie, err := context.Cookie("session_token")
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			context.JSON(http.StatusBadRequest, "Cookie not found")
+		default:
+			context.JSON(http.StatusInternalServerError, "Server error")
+		}
+		return
+	}
+	context.JSON(http.StatusOK, cookie)
+}
+
 func RegisterRouter(router *gin.RouterGroup) {
+	store := cookie.NewStore([]byte("secret"))
+	store.Options(sessions.Options{MaxAge: 60 * 60 * 1440, Path: "/", HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode}) // expire in 2 months
+	router.Use(sessions.Sessions("session_token", store))
+
+	//USER
 	router.GET("/api/urls/:id", handleRouteFindURLById)
+	router.GET("/api/user-session-urls", handleRouteGetAllUrlsBasedOnSessionToken)
 	router.POST("/api/urls", handleRouteCreateShortUrl)
 	router.DELETE("/api/delete-url", handleRouteDeleteId)
-	router.DELETE("/api/delete-expired-ids", handleRouteDeleteExpiredIds)
+	//OTHERS
+	router.GET("/api/set-cookie", setCookieHandler)
+	router.GET("/api/get-cookie", getCookieHandler)
 	//ADMIN
 	router.GET("/api/urls", handleRouteGetAllUrls)
 	router.GET("/api/expired-urls", handleRouteGetAllExpiredUrls)
 	router.GET("/api/new-short-id", handleRouteGetNewShortId)
+	//CRON
+	router.DELETE("/api/delete-expired-ids", handleRouteDeleteExpiredIds)
 }
 
 func RegisterCors(router *gin.Engine) {
@@ -78,7 +119,7 @@ func handleRouteGetNewShortId(context *gin.Context) {
 
 func handleRouteFindURLById(context *gin.Context) {
 	id := context.Param("id")
-	urlData, err := GetSingleUrl(id)
+	urlData, err := GetSingleUrlUnexpired(id)
 	if err != nil {
 		errorMessage := ErrorResponse{
 			Message:   "This URL is invalid or a destination URL could not be found",
@@ -103,8 +144,11 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		Message:   "A URL was not provided or the input was incorrect",
 		ErrorCode: http.StatusForbidden,
 	}
+
+	sessionToken, err := context.Cookie("session_token")
+
 	if err != nil {
-		log.Print(err)
+		log.Print("(handleRouteCreateShortUrl):", err)
 	} else if productionSiteUrled.Hostname() == destinationSiteUrled.Hostname() {
 		context.JSON(http.StatusForbidden, map[string]ErrorResponse{"error": errorMessageIncorrectUrl})
 		return
@@ -117,9 +161,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		return
 	}
 
-	//urlData, err := addURLToFirestore(destination, self_destruct)
-
-	urlData, err := CreateUrl(destination, selfDestruct)
+	urlData, err := CreateUrl(destination, selfDestruct, sessionToken)
 
 	if err != nil {
 		errorMessage := ErrorResponse{
@@ -142,6 +184,21 @@ func handleRouteGetAllUrls(context *gin.Context) {
 	context.JSON(http.StatusOK, map[string][]URLData{"result": urls})
 }
 
+func handleRouteGetAllUrlsBasedOnSessionToken(context *gin.Context) {
+	sessionToken := context.Query("session_token")
+	urlData, err := GetAllUrlsBasedOnSessionToken(sessionToken)
+	if err != nil {
+		errorMessage := ErrorResponse{
+			Message:   "Cannot find urls based on session token",
+			Error:     err.Error(),
+			ErrorCode: http.StatusNotFound,
+		}
+		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
+	} else {
+		context.JSON(http.StatusOK, map[string][]URLData{"result": urlData})
+	}
+}
+
 func handleRouteGetAllExpiredUrls(context *gin.Context) {
 	urls, err := GetAllExpiredUrls()
 	if err != nil {
@@ -160,7 +217,8 @@ func handleRouteDeleteExpiredIds(context *gin.Context) {
 
 func handleRouteDeleteId(context *gin.Context) {
 	id := context.Query("id")
-	result, err := DeleteFromDatabase(id)
+	sessionToken := context.Query("session_token")
+	result, err := DeleteFromDatabase(id, sessionToken)
 	if err != nil {
 		errorMessage := ErrorResponse{
 			Message:   "Failed to delete from database",

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { GetServerSideProps } from "next";
 import { useQRCode } from "next-qrcode";
 
 import { useToast } from "@/src/context/ToastContext";
@@ -6,7 +7,12 @@ import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard, useLocalStorage } from "@/src/hooks";
 import ErrorBoundary from "@/src/components/ErrorBoundary";
 
-import { PRODUCTION_SITE_URL, URL_REGEX, selfDestructDurations } from "@/src/constants";
+import {
+  BASE_URL,
+  PRODUCTION_SITE_URL,
+  URL_REGEX,
+  selfDestructDurations,
+} from "@/src/constants";
 import { URLData, URLDataNextAPI } from "@/src/interfaces";
 
 import LoadingIcon from "@/src/components/Icons/LoadingIcon";
@@ -15,6 +21,7 @@ import QRCodeIcon from "@/src/components/Icons/QRCodeIcon";
 import GitHubLink from "@/src/components/Icons/GitHubLink";
 import TrashIcon from "@/src/components/Icons/TrashIcon";
 import ChevronIcon from "@/src/components/Icons/ChevronIcon";
+import { getCookie } from "cookies-next";
 
 const ClientOnly = React.lazy(() =>
   import("@/src/components/ClientOnly").then((module) => ({
@@ -22,8 +29,12 @@ const ClientOnly = React.lazy(() =>
   }))
 );
 
-export default function Home() {
-  const [urlData, setUrlData] = useLocalStorage<URLData[]>("urls", []);
+interface HomeProps {
+  userUrls: URLData[];
+}
+
+export const Home: React.FC<HomeProps> = ({ userUrls }) => {
+  const [urlData, setUrlData] = useLocalStorage<URLData[]>("urls", userUrls);
   const [destinationUrl, setDestinationUrl] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +45,10 @@ export default function Home() {
   const { dispatchModal } = useModal();
   const [, copy] = useCopyToClipboard();
   const { Canvas: QRCodeCanvas } = useQRCode();
+
+  React.useEffect(() => {
+    setUrlData(userUrls);
+  }, []);
 
   const handleCreateShortURL = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -66,6 +81,7 @@ export default function Home() {
       ? `/api/urls?destination=${destinationUrl}&self_destruct=${selectedDuration}`
       : `/api/urls?destination=${destinationUrl}`;
     const response = await fetch(url, {
+      credentials: "include",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -126,7 +142,10 @@ export default function Home() {
   };
 
   const handleDeleteShortUrl = async (urlItem: URLData) => {
-    const response = await fetch(`/api/delete-url?id=${urlItem.id}`, {
+    const sessionToken = getCookie("session_token");
+    const url = sessionToken ? `/api/delete-url?id=${urlItem.id}&session_token=${sessionToken}` : `/api/delete-url?id=${urlItem.id}`;
+    const response = await fetch(url, {
+      credentials: "include",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -203,11 +222,11 @@ export default function Home() {
                     onChange={handleDurationChange}
                     className="bg-gray-50 px-2 w-full sm:w-40 h-8 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block"
                   >
-                    {
-                      selfDestructDurations.map((duration) => (
-                        <option key={duration.label} value={duration.value}>{duration.label}</option>
-                      ))
-                    }
+                    {selfDestructDurations.map((duration) => (
+                      <option key={duration.label} value={duration.value}>
+                        {duration.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <input
@@ -287,4 +306,36 @@ export default function Home() {
       <GitHubLink />
     </main>
   );
-}
+};
+
+export default Home;
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const sessionToken = req.cookies["session_token"];
+
+  if (sessionToken) {
+    const url = `${BASE_URL}/user-session-urls?session_token=${sessionToken}`;
+
+    const urlDataRequest = await fetch(url, {
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    });
+
+    const urlDataResponse = await urlDataRequest.json();
+
+    const result = urlDataResponse?.result;
+
+    const props: HomeProps = {
+      userUrls: Array.isArray(result) ? result : [],
+    };
+
+    return {
+      props,
+    };
+  }
+  return { props: {} };
+};

@@ -20,15 +20,16 @@ func getNewPlanetScaleClient() (*sql.DB, error) {
 }
 
 type URLData struct {
-	Destination  string `json:"destination"`
-	ID           string `json:"id"`
-	DateCreated  string `json:"date_created"`
-	URL          string `json:"url"`
-	SelfDestruct string `json:"self_destruct"`
-	SessionToken string `json:"session_token"`
+	Destination  string         `json:"destination"`
+	ID           string         `json:"id"`
+	DateCreated  string         `json:"date_created"`
+	URL          string         `json:"url"`
+	SelfDestruct string         `json:"self_destruct"`
+	SessionToken string         `json:"session_token"`
+	Password     sql.NullString `json:"password"`
 }
 
-func CreateUrl(url string, selfDestruct int64, sessionToken string) (URLData, error) {
+func CreateUrl(url string, selfDestruct int64, sessionToken string, password string) (URLData, error) {
 	newURLID := randomSequence(6)
 
 	doesUrlIdExist := checkIfUrlIdExists(newURLID)
@@ -37,12 +38,19 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string) (URLData, er
 		newURLID = randomSequence(6)
 	}
 
+	var testPassword = sql.NullString{String: password, Valid: false}
+
+	if password != "" {
+		testPassword = sql.NullString{String: password, Valid: true}
+	}
+
 	newUrlData := URLData{
 		Destination:  url,
 		ID:           newURLID,
 		DateCreated:  time.Now().UTC().Format(time.RFC3339),
 		URL:          PRODUCTION_SITE_URL + newURLID,
 		SessionToken: sessionToken,
+		Password:     testPassword,
 	}
 
 	if selfDestruct != 0 {
@@ -52,9 +60,17 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string) (URLData, er
 		newUrlData.SelfDestruct = ""
 	}
 
-	query := "INSERT INTO urls (id, destination, date_created, url, self_destruct, session_token) VALUES (?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO urls (id, destination, date_created, url, self_destruct, session_token, password) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	db, err := getNewPlanetScaleClient()
-	_, err = db.Exec(query, newUrlData.ID, newUrlData.Destination, newUrlData.DateCreated, newUrlData.URL, newUrlData.SelfDestruct, newUrlData.SessionToken)
+	_, err = db.Exec(query,
+		newUrlData.ID,
+		newUrlData.Destination,
+		newUrlData.DateCreated,
+		newUrlData.URL,
+		newUrlData.SelfDestruct,
+		newUrlData.SessionToken,
+		newUrlData.Password,
+	)
 
 	if err != nil {
 		log.Print("(CreateUrl) db.Exec", err)
@@ -75,7 +91,15 @@ func GetUrls() ([]URLData, error) {
 	urls := []URLData{}
 	for res.Next() {
 		var urlData URLData
-		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct, &urlData.SessionToken)
+		err := res.Scan(
+			&urlData.ID,
+			&urlData.Destination,
+			&urlData.DateCreated,
+			&urlData.URL,
+			&urlData.SelfDestruct,
+			&urlData.SessionToken,
+			&urlData.Password,
+		)
 		if err != nil {
 			log.Print("(GetUrls) res.Scan", err)
 		}
@@ -89,7 +113,15 @@ func GetSingleUrl(id string) (URLData, error) {
 	urlData := URLData{}
 	query := `SELECT * FROM urls WHERE id = ?`
 	db, err := getNewPlanetScaleClient()
-	err = db.QueryRow(query, id).Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct, &urlData.SessionToken)
+	err = db.QueryRow(query, id).Scan(
+		&urlData.ID,
+		&urlData.Destination,
+		&urlData.DateCreated,
+		&urlData.URL,
+		&urlData.SelfDestruct,
+		&urlData.SessionToken,
+		&urlData.Password,
+	)
 	if err != nil {
 		log.Println("(GetSingleUrl) db.Exec", err)
 	}
@@ -102,7 +134,15 @@ func GetSingleUrlUnexpired(id string) (URLData, error) {
 	query := `SELECT * FROM urls WHERE id = ? AND self_destruct = '' OR self_destruct > ?`
 	db, err := getNewPlanetScaleClient()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
-	err = db.QueryRow(query, id, timeNow).Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct, &urlData.SessionToken)
+	err = db.QueryRow(query, id, timeNow).Scan(
+		&urlData.ID,
+		&urlData.Destination,
+		&urlData.DateCreated,
+		&urlData.URL,
+		&urlData.SelfDestruct,
+		&urlData.SessionToken,
+		&urlData.Password,
+	)
 	if err != nil {
 		log.Println("(GetSingleUrl) db.Exec", err)
 	}
@@ -123,7 +163,15 @@ func GetAllUrlsBasedOnSessionToken(sessionToken string) ([]URLData, error) {
 	urls := []URLData{}
 	for res.Next() {
 		var urlData URLData
-		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct, &urlData.SessionToken)
+		err := res.Scan(
+			&urlData.ID,
+			&urlData.Destination,
+			&urlData.DateCreated,
+			&urlData.URL,
+			&urlData.SelfDestruct,
+			&urlData.SessionToken,
+			&urlData.Password,
+		)
 		if err != nil {
 			log.Print("(GetAllUrlsBasedOnSessionToken) res.Scan", err)
 		}
@@ -181,7 +229,15 @@ func DeleteAllExpiredDocuments() ([]string, error) {
 	urls := []string{}
 	for res.Next() {
 		var urlData URLData
-		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct, &urlData.SessionToken)
+		err := res.Scan(
+			&urlData.ID,
+			&urlData.Destination,
+			&urlData.DateCreated,
+			&urlData.URL,
+			&urlData.SelfDestruct,
+			&urlData.SessionToken,
+			&urlData.Password,
+		)
 		if err != nil {
 			log.Print("(DeleteAllExpiredDocuments) res.Scan", err)
 		}

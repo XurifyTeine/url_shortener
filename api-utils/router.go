@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -117,6 +118,13 @@ func handleRouteGetNewShortId(context *gin.Context) {
 	context.JSON(http.StatusOK, urlData)
 }
 
+type CreateShortUrlRequestBody struct {
+	Destination  string `json:"destination"`
+	URL          string `json:"url"`
+	SelfDestruct string `json:"self_destruct"`
+	Password     string `json:"password"`
+}
+
 func handleRouteFindURLById(context *gin.Context) {
 	id := context.Param("id")
 	urlData, err := GetSingleUrlUnexpired(id)
@@ -137,6 +145,19 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 	destination := context.Query("destination")
 	selfDestructString := context.Query("self_destruct")
 	selfDestruct, _ := strconv.ParseInt(selfDestructString, 10, 64)
+
+	creds := &CreateShortUrlRequestBody{}
+	err := json.NewDecoder(context.Request.Body).Decode(creds)
+	if err != nil {
+		log.Print("(handleRouteCreateShortUrl) decode error:", err)
+	}
+
+	hashedPassword := ""
+
+	if creds.Password != "" {
+		hashedPasswordResult, _ := HashPassword(creds.Password)
+		hashedPassword = hashedPasswordResult
+	}
 
 	destinationSiteUrled, _ := url.Parse(destination)
 	productionSiteUrled, err := url.Parse(PRODUCTION_SITE_URL)
@@ -161,7 +182,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		return
 	}
 
-	urlData, err := CreateUrl(destination, selfDestruct, sessionToken)
+	urlData, err := CreateUrl(destination, selfDestruct, sessionToken, hashedPassword)
 
 	if err != nil {
 		errorMessage := ErrorResponse{

@@ -87,6 +87,11 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         "Content-Type": "application/json",
       },
       method: "POST",
+      body: JSON.stringify({
+        password,
+        destination: destinationUrl,
+        self_destruct: selectedDuration,
+      }),
     });
     const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;
@@ -143,7 +148,9 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
 
   const handleDeleteShortUrl = async (urlItem: URLData) => {
     const sessionToken = getCookie("session_token");
-    const url = sessionToken ? `/api/delete-url?id=${urlItem.id}&session_token=${sessionToken}` : `/api/delete-url?id=${urlItem.id}`;
+    const url = sessionToken
+      ? `/api/delete-url?id=${urlItem.id}&session_token=${sessionToken}`
+      : `/api/delete-url?id=${urlItem.id}`;
     const response = await fetch(url, {
       credentials: "include",
       headers: {

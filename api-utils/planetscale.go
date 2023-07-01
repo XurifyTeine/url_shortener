@@ -54,7 +54,7 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 	}
 
 	if selfDestruct != 0 {
-		selfDestructDuration := time.Second * time.Duration(selfDestruct)
+		selfDestructDuration := time.Millisecond * time.Duration(selfDestruct)
 		newUrlData.SelfDestruct = time.Now().UTC().Add(selfDestructDuration).Format(time.RFC3339)
 	} else {
 		newUrlData.SelfDestruct = ""
@@ -135,8 +135,6 @@ func GetSingleUrlUnexpired(id string) (URLData, error) {
 	db, err := getNewPlanetScaleClient()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 
-	log.Println("MarshalJSON")
-
 	err = db.QueryRow(query, id, timeNow).Scan(
 		&urlData.ID,
 		&urlData.Destination,
@@ -147,7 +145,7 @@ func GetSingleUrlUnexpired(id string) (URLData, error) {
 		&urlData.Password,
 	)
 	if err != nil {
-		log.Println("(GetSingleUrl) db.Exec", err)
+		log.Println("(GetSingleUrlUnexpired) db.Exec", err)
 	}
 
 	return urlData, err

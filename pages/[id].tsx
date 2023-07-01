@@ -20,11 +20,11 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log(hashedPassword, redirectionUrl)
+  console.log(hashedPassword, redirectionUrl);
 
   const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log(value)
+    console.log(value);
     setPassword(value);
   };
 
@@ -56,40 +56,44 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
 
   return (
     <main className="relative min-h-screen flex flex-col items-center p-2 bg-brand-green-200 pt-32">
-      <h1 className="mb-2 text-3xl font-bold text-white">Password</h1>
-      <form className="flex flex-col items-center justify-center">
-        <span className="flex flex-wrap md:flex-nowrap rounded-sm overflow-hidden block w-full">
-          <div className="w-full relative">
-            <ErrorBoundary name="password-input">
-              <input
-                className="caret-zinc-900 h-12 py-2 px-3 bg-white text-gray-600 w-full max-w-[30rem] focus:outline-none placeholder:text-gray-400"
-                value={password}
-                onChange={handleChangePassword}
-                onKeyDown={handleKeyDownCheckPassword}
-                id="password"
-                type="password"
-                placeholder="Please enter the password"
-              />
-            </ErrorBoundary>
-          </div>
-          <button
-            className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
-            onClick={handleClickCheckPassword}
-          >
-            {isLoading && (
-              <span className="mr-2">
-                <LoadingIcon />
+      {password && (
+        <>
+          <h1 className="mb-2 text-3xl font-bold text-white">Password</h1>
+          <form className="flex flex-col items-center justify-center">
+            <span className="flex flex-wrap md:flex-nowrap rounded-sm overflow-hidden block w-full">
+              <div className="w-full relative">
+                <ErrorBoundary name="password-input">
+                  <input
+                    className="caret-zinc-900 h-12 py-2 px-3 bg-white text-gray-600 w-full max-w-[30rem] focus:outline-none placeholder:text-gray-400"
+                    value={password}
+                    onChange={handleChangePassword}
+                    onKeyDown={handleKeyDownCheckPassword}
+                    id="password"
+                    type="password"
+                    placeholder="Please enter the password"
+                  />
+                </ErrorBoundary>
+              </div>
+              <button
+                className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
+                onClick={handleClickCheckPassword}
+              >
+                {isLoading && (
+                  <span className="mr-2">
+                    <LoadingIcon />
+                  </span>
+                )}
+                {isLoading ? "Loading..." : "Verify"}
+              </button>
+            </span>
+            {error && (
+              <span className="error-message text-red-error-text font-semibold w-full mt-1">
+                {error}
               </span>
             )}
-            {isLoading ? "Loading..." : "Verify"}
-          </button>
-        </span>
-        {error && (
-          <span className="error-message text-red-error-text font-semibold w-full mt-1">
-            {error}
-          </span>
-        )}
-      </form>
+          </form>
+        </>
+      )}
     </main>
   );
 };
@@ -123,6 +127,12 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
           },
         };
       } else {
+        const isPassedSelfDestruct = data.result?.self_destruct ? new Date(data.result.self_destruct).getTime() < new Date().getTime() : false;
+      
+        if (isPassedSelfDestruct) {
+          return { notFound: true };
+        }
+        
         return {
           redirect: {
             destination: data.result.destination,

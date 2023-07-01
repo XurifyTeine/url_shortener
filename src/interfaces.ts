@@ -3,7 +3,7 @@ export interface URLData {
   id: string;
   date_created: string;
   url: string;
-  self_destruct: number;
+  self_destruct: string;
   session_token?: string | null;
   password?: { String: string; Valid: boolean } | null;
 }

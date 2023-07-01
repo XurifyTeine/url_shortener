@@ -119,9 +119,8 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   };
 
   const handleKeyDownCreateShortURL = (
-    e: React.KeyboardEvent<HTMLButtonElement>
+    e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    e.preventDefault();
     if (e.key === "Enter") {
       handleCreateShortURL();
     }
@@ -212,6 +211,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                   className="caret-zinc-900 h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
                   value={destinationUrl}
                   onChange={handleChangeDestinationUrl}
+                  onKeyDown={handleKeyDownCreateShortURL}
                   id="url"
                   placeholder="Paste a link here"
                 />
@@ -220,7 +220,6 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
             <button
               className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
               onClick={handleClickCreateShortURL}
-              onKeyDown={handleKeyDownCreateShortURL}
               disabled={isLoading}
             >
               {isLoading && (

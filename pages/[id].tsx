@@ -20,11 +20,11 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log(hashedPassword, redirectionUrl)
+
   const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (error) {
-      setError(null);
-    }
     const value = e.target.value;
+    console.log(value)
     setPassword(value);
   };
 
@@ -49,7 +49,6 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
   const handleKeyDownCheckPassword = (
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    e.preventDefault();
     if (e.key === "Enter") {
       handleCheckPassword();
     }
@@ -115,8 +114,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       console.error(`SERVERSIDE [ID] PAGE ERROR: ${shortId}`, error);
       return { notFound: true };
     } else if (data && data.result && data.result.destination) {
-      if (data.result.password) {
-        const hashedPassword = data.result?.password?.["String"] ?? null;
+      const hashedPassword = data.result?.password?.["String"]?.trim() || null;
+      if (hashedPassword) {
         return {
           props: {
             hashedPassword,

@@ -40,6 +40,9 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<string | number>("");
+  const [urlsInDeletionProgress, setUrlsInDeletionProgress] = useState<
+    string[]
+  >([]);
 
   const { dispatchToast } = useToast();
   const { dispatchModal } = useModal();
@@ -109,7 +112,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         url: `${window.location.origin}/${data.id}`,
         self_destruct: data.self_destruct,
       };
-      setUrlData([...(urlData ?? []), newUrlData]);
+      setUrlData([newUrlData, ...(urlData ?? [])]);
       setIsLoading(false);
     }
   };
@@ -160,6 +163,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   };
 
   const handleDeleteShortUrl = async (urlItem: URLData) => {
+    setUrlsInDeletionProgress([...urlsInDeletionProgress, urlItem.id]);
     const sessionToken = getCookie("session_token");
     const url = sessionToken
       ? `/api/delete-url?id=${urlItem.id}&session_token=${sessionToken}`
@@ -176,6 +180,10 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     const data = result?.result as URLData;
     if (data) {
       const newUrlData = urlData.filter((item) => item.id !== urlItem.id);
+      const newUrlsInDeletionProgress = urlsInDeletionProgress.filter(
+        (urlId) => urlId !== urlItem.id
+      );
+      setUrlsInDeletionProgress(newUrlsInDeletionProgress);
       setUrlData(newUrlData);
     }
   };
@@ -216,12 +224,16 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
               </ErrorBoundary>
             </div>
             <button
-              className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
+              className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
               onClick={handleClickCreateShortURL}
               onKeyDown={handleKeyDownCreateShortURL}
               disabled={isLoading}
             >
-              {isLoading && <LoadingIcon />}{" "}
+              {isLoading && (
+                <span className="mr-2">
+                  <LoadingIcon />
+                </span>
+              )}
               {isLoading ? "Loading..." : "Shorten URL"}
             </button>
           </span>
@@ -266,54 +278,59 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
           <ClientOnly>
             {Array.isArray(urlData) &&
               urlData.length > 0 &&
-              urlData.map((urlItem) => (
-                <ErrorBoundary name="url-list" key={urlItem.id}>
-                  <div className="flex mt-2">
-                    <div className="result-box flex w-full bg-brand-grayish-green-200 rounded-sm">
-                      <div className="flex flex-col w-full p-2">
-                        <span>
-                          <span className="mr-1.5">Click to visit:</span>
-                          <a
-                            className="text-brand-neon-green-100 break-all font-semibold"
-                            href={urlItem.url}
-                            target="_blank"
+              urlData.map((urlItem) => {
+                const isTryingToDelete = urlsInDeletionProgress.includes(
+                  urlItem.id
+                );
+                return (
+                  <ErrorBoundary name="url-list" key={urlItem.id}>
+                    <div className="flex mt-2">
+                      <div className="result-box flex w-full bg-brand-grayish-green-200 rounded-sm">
+                        <div className="flex flex-col w-full p-2">
+                          <span>
+                            <span className="mr-1.5">Click to visit:</span>
+                            <a
+                              className="text-brand-neon-green-100 break-all font-semibold"
+                              href={urlItem.url}
+                              target="_blank"
+                            >
+                              {urlItem.url}
+                            </a>
+                          </span>
+                          <span className="flex">
+                            <span className="mr-1.5">Destination:</span>
+                            <input
+                              className="break-all w-full px-1 bg-brand-green-400 text-gray-500 rounded-sm"
+                              defaultValue={urlItem.destination}
+                              disabled={true}
+                            />
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-100 p-2">
+                          <button
+                            onClick={() => handleCopyUrl(urlItem)}
+                            title="Copy to clipboard"
                           >
-                            {urlItem.url}
-                          </a>
-                        </span>
-                        <span className="flex">
-                          <span className="mr-1.5">Destination:</span>
-                          <input
-                            className="break-all w-full px-1 bg-brand-green-400 text-gray-500 rounded-sm"
-                            defaultValue={urlItem.destination}
-                            disabled={true}
-                          />
-                        </span>
+                            <ClipboardIcon />
+                          </button>
+                          <button
+                            onClick={() => handleOpenQRCodeModal(urlItem)}
+                            title="Show QR Code"
+                          >
+                            <QRCodeIcon />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-100 p-2">
-                        <button
-                          onClick={() => handleCopyUrl(urlItem)}
-                          title="Copy to clipboard"
-                        >
-                          <ClipboardIcon />
-                        </button>
-                        <button
-                          onClick={() => handleOpenQRCodeModal(urlItem)}
-                          title="Show QR Code"
-                        >
-                          <QRCodeIcon />
-                        </button>
-                      </div>
+                      <button
+                        className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
+                        onClick={() => handleDeleteShortUrl(urlItem)}
+                      >
+                        {isTryingToDelete ? <LoadingIcon /> : <TrashIcon />}
+                      </button>
                     </div>
-                    <button
-                      className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
-                      onClick={() => handleDeleteShortUrl(urlItem)}
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                </ErrorBoundary>
-              ))}
+                  </ErrorBoundary>
+                );
+              })}
           </ClientOnly>
         </React.Suspense>
         <p className="mt-2 text-brand-dark-green-100">

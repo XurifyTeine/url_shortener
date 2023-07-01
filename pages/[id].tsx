@@ -41,9 +41,7 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
     }
   };
 
-  const handleClickCheckPassword = (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleClickCheckPassword = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     handleCheckPassword();
   };
@@ -76,10 +74,15 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
             </ErrorBoundary>
           </div>
           <button
-            className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
+            className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
             onClick={handleClickCheckPassword}
           >
-            {isLoading && <LoadingIcon />} {isLoading ? "Loading..." : "Verify"}
+            {isLoading && (
+              <span className="mr-2">
+                <LoadingIcon />
+              </span>
+            )}
+            {isLoading ? "Loading..." : "Verify"}
           </button>
         </span>
         {error && (

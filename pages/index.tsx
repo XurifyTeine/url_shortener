@@ -78,6 +78,8 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     if (isLoading) return;
     setIsLoading(true);
 
+    console.log("selectedDuration", selectedDuration)
+
     const url = selectedDuration
       ? `/api/urls?destination=${destinationUrl}&self_destruct=${selectedDuration}`
       : `/api/urls?destination=${destinationUrl}`;
@@ -88,11 +90,6 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({
-        password,
-        destination: destinationUrl,
-        self_destruct: selectedDuration,
-      }),
     });
     const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;
@@ -309,7 +306,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                             <ClientOnly>
                               <Countdown
                                 date={new Date(urlItem.self_destruct)}
-                                zeroPadTime={1}
+                                intervalDelay={0}
                                 renderer={CountdownRenderer}
                               />
                             </ClientOnly>
@@ -368,11 +365,14 @@ const CountdownRenderer: React.FC<CountdownRenderProps> = ({
       <span className="bg-red-error-text text-sm px-2 rounded">Expired</span>
     );
   } else {
+    const _hours = String(hours).length === 1 ? `0${hours}` : hours;
+    const _minutes = String(minutes).length === 1 ? `0${minutes}` : minutes;
+    const _seconds = String(seconds).length === 1 ? `0${seconds}` : seconds;
     return (
       <div className="flex">
         <span className="mr-1.5">Expires in:</span>
         <span>
-          {hours}:{minutes}:{seconds}
+          {_hours}:{_minutes}:{_seconds}
         </span>
       </div>
     );

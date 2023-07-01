@@ -4,7 +4,8 @@ export interface URLData {
   date_created: string;
   url: string;
   self_destruct: number;
-  session_token?: string;
+  session_token?: string | null;
+  password?: { String: string; Valid: boolean } | null;
 }
 
 export interface URLError {
@@ -13,13 +14,15 @@ export interface URLError {
   errorCode: number;
 }
 
-export type URLDataResponse = {
-  result: URLData;
-  error?: URLError;
-} | {
-  result?: URLData;
-  error: URLError;
-}
+export type URLDataResponse =
+  | {
+      result: URLData;
+      error?: URLError;
+    }
+  | {
+      result?: URLData;
+      error: URLError;
+    };
 
 export type URLDataNextAPI = {
   result?: URLData;

@@ -50,10 +50,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     setUrlData(userUrls);
   }, []);
 
-  const handleCreateShortURL = async (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.preventDefault();
+  const handleCreateShortURL = async () => {
     if (destinationUrl.trim() === "") {
       dispatchToast("Please enter in a URL", "warning", 5000);
       return;
@@ -117,14 +114,30 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     }
   };
 
-  const handleOnChangeDestinationUrl = (
+  const handleClickCreateShortURL = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.preventDefault();
+    handleCreateShortURL();
+  };
+
+  const handleKeyDownCreateShortURL = (
+    e: React.KeyboardEvent<HTMLButtonElement>
+  ) => {
+    e.preventDefault();
+    if (e.key === "Enter") {
+      handleCreateShortURL();
+    }
+  };
+
+  const handleChangeDestinationUrl = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
     setDestinationUrl(value);
   };
 
-  const handleOnChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
   };
@@ -196,7 +209,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                 <input
                   className="caret-zinc-900 h-12 py-2 px-3 bg-white text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
                   value={destinationUrl}
-                  onChange={handleOnChangeDestinationUrl}
+                  onChange={handleChangeDestinationUrl}
                   id="url"
                   placeholder="Paste a link here"
                 />
@@ -204,7 +217,8 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
             </div>
             <button
               className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
-              onClick={handleCreateShortURL}
+              onClick={handleClickCreateShortURL}
+              onKeyDown={handleKeyDownCreateShortURL}
               disabled={isLoading}
             >
               {isLoading && <LoadingIcon />}{" "}
@@ -239,7 +253,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                 <input
                   className="h-8 py-2 px-3 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
                   value={password}
-                  onChange={handleOnChangePassword}
+                  onChange={handleChangePassword}
                   id="password"
                   type="password"
                   placeholder="Password"

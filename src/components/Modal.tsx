@@ -31,12 +31,12 @@ export const Modal: React.FC<ModalProps> = ({
       className="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 min-h-screen max-h-full flex items-center justify-center bg-black/40"
     >
       <div className="relative w-full max-w-md max-h-full">
-        <div className="relative bg-white rounded-lg shadow">
+        <div className="relative bg-white rounded shadow">
           <div className={modalContents[!!body ? "hasBody" : "noBody"]}>
             <h3 className="text-xl font-medium text-gray-900">{title}</h3>
             <button
               type="button"
-              className="text-black bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+              className="text-black bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded text-sm p-1.5 ml-auto inline-flex items-center"
               data-modal-hide="small-modal"
               onClick={handleClose}
             >

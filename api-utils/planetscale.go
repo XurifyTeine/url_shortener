@@ -134,6 +134,9 @@ func GetSingleUrlUnexpired(id string) (URLData, error) {
 	query := `SELECT * FROM urls WHERE id = ? AND self_destruct = '' OR self_destruct > ?`
 	db, err := getNewPlanetScaleClient()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
+
+	log.Println("MarshalJSON")
+
 	err = db.QueryRow(query, id, timeNow).Scan(
 		&urlData.ID,
 		&urlData.Destination,

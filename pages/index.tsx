@@ -78,8 +78,6 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     if (isLoading) return;
     setIsLoading(true);
 
-    console.log("selectedDuration", selectedDuration)
-
     const url = selectedDuration
       ? `/api/urls?destination=${destinationUrl}&self_destruct=${selectedDuration}`
       : `/api/urls?destination=${destinationUrl}`;
@@ -90,6 +88,9 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         "Content-Type": "application/json",
       },
       method: "POST",
+      body: JSON.stringify({
+        password,
+      }),
     });
     const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;

@@ -274,65 +274,61 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
             )}
           </div>
         </form>
-        <React.Suspense>
-          <ClientOnly>
-            {Array.isArray(urlData) &&
-              urlData.length > 0 &&
-              urlData.map((urlItem) => {
-                const isTryingToDelete = urlsInDeletionProgress.includes(
-                  urlItem.id
-                );
-                return (
-                  <ErrorBoundary name="url-list" key={urlItem.id}>
-                    <div className="flex mt-2">
-                      <div className="result-box flex w-full bg-brand-grayish-green-200 rounded-sm">
-                        <div className="flex flex-col w-full p-2">
-                          <span>
-                            <span className="mr-1.5">Click to visit:</span>
-                            <a
-                              className="text-brand-neon-green-100 break-all font-semibold"
-                              href={urlItem.url}
-                              target="_blank"
-                            >
-                              {urlItem.url}
-                            </a>
-                          </span>
-                          <span className="flex">
-                            <span className="mr-1.5">Destination:</span>
-                            <input
-                              className="break-all w-full px-1 bg-brand-green-400 text-gray-500 rounded-sm"
-                              defaultValue={urlItem.destination}
-                              disabled={true}
-                            />
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-100 p-2">
-                          <button
-                            onClick={() => handleCopyUrl(urlItem)}
-                            title="Copy to clipboard"
-                          >
-                            <ClipboardIcon />
-                          </button>
-                          <button
-                            onClick={() => handleOpenQRCodeModal(urlItem)}
-                            title="Show QR Code"
-                          >
-                            <QRCodeIcon />
-                          </button>
-                        </div>
-                      </div>
+        {Array.isArray(urlData) &&
+          urlData.length > 0 &&
+          urlData.map((urlItem) => {
+            const isTryingToDelete = urlsInDeletionProgress.includes(
+              urlItem.id
+            );
+            return (
+              <ErrorBoundary name="url-list" key={urlItem.id}>
+                <div className="flex mt-2">
+                  <div className="result-box flex w-full bg-brand-grayish-green-200 rounded-sm">
+                    <div className="flex flex-col w-full p-2">
+                      <span>
+                        <span className="mr-1.5">Click to visit:</span>
+                        <a
+                          className="text-brand-neon-green-100 break-all font-semibold"
+                          href={urlItem.url}
+                          target="_blank"
+                        >
+                          {urlItem.url}
+                        </a>
+                      </span>
+                      <span className="flex">
+                        <span className="mr-1.5">Destination:</span>
+                        <input
+                          className="break-all w-full px-1 bg-brand-green-400 text-gray-500 rounded-sm"
+                          defaultValue={urlItem.destination}
+                          disabled={true}
+                        />
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-100 p-2">
                       <button
-                        className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
-                        onClick={() => handleDeleteShortUrl(urlItem)}
+                        onClick={() => handleCopyUrl(urlItem)}
+                        title="Copy to clipboard"
                       >
-                        {isTryingToDelete ? <LoadingIcon /> : <TrashIcon />}
+                        <ClipboardIcon />
+                      </button>
+                      <button
+                        onClick={() => handleOpenQRCodeModal(urlItem)}
+                        title="Show QR Code"
+                      >
+                        <QRCodeIcon />
                       </button>
                     </div>
-                  </ErrorBoundary>
-                );
-              })}
-          </ClientOnly>
-        </React.Suspense>
+                  </div>
+                  <button
+                    className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
+                    onClick={() => handleDeleteShortUrl(urlItem)}
+                  >
+                    {isTryingToDelete ? <LoadingIcon /> : <TrashIcon />}
+                  </button>
+                </div>
+              </ErrorBoundary>
+            );
+          })}
         <p className="mt-2 text-brand-dark-green-100">
           Experience the magically URL shortening powers of{" "}
           <span className="font-bold">NoLongr</span>. This tool will help you to

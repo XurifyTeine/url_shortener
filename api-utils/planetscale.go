@@ -38,10 +38,10 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		newURLID = randomSequence(6)
 	}
 
-	var testPassword = sql.NullString{String: password, Valid: false}
+	var sqlPassword = sql.NullString{String: password, Valid: false}
 
 	if password != "" {
-		testPassword = sql.NullString{String: password, Valid: true}
+		sqlPassword = sql.NullString{String: password, Valid: true}
 	}
 
 	newUrlData := URLData{
@@ -50,7 +50,7 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		DateCreated:  time.Now().UTC().Format(time.RFC3339),
 		URL:          PRODUCTION_SITE_URL + newURLID,
 		SessionToken: sessionToken,
-		Password:     testPassword,
+		Password:     sqlPassword,
 	}
 
 	if selfDestruct != 0 {
@@ -153,9 +153,8 @@ func GetSingleUrlUnexpired(id string) (URLData, error) {
 
 func GetAllUrlsBasedOnSessionToken(sessionToken string) ([]URLData, error) {
 	db, err := getNewPlanetScaleClient()
-	query := "SELECT * FROM urls WHERE session_token = ? AND self_destruct = '' OR self_destruct > ?"
-	timeNow := time.Now().UTC().Format(time.RFC3339)
-	res, err := db.Query(query, sessionToken, timeNow)
+	query := "SELECT * FROM urls WHERE session_token = ?"
+	res, err := db.Query(query, sessionToken)
 	defer res.Close()
 	if err != nil {
 		log.Print("(GetAllUrlsBasedOnSessionToken) db.Query", err)

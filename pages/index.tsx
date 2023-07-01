@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { GetServerSideProps } from "next";
 import { useQRCode } from "next-qrcode";
+import Countdown, { CountdownRenderProps } from "react-countdown";
+import { getCookie } from "cookies-next";
 
 import { useToast } from "@/src/context/ToastContext";
 import { useModal } from "@/src/context/ModalContext";
@@ -21,7 +23,12 @@ import QRCodeIcon from "@/src/components/Icons/QRCodeIcon";
 import GitHubLink from "@/src/components/Icons/GitHubLink";
 import TrashIcon from "@/src/components/Icons/TrashIcon";
 import ChevronIcon from "@/src/components/Icons/ChevronIcon";
-import { getCookie } from "cookies-next";
+
+const ClientOnly = React.lazy(() =>
+  import("@/src/components/ClientOnly").then((module) => ({
+    default: module.ClientOnly,
+  }))
+);
 
 interface HomeProps {
   userUrls: URLData[];
@@ -296,6 +303,19 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                           disabled={true}
                         />
                       </span>
+                      {urlItem.self_destruct && (
+                        <span className="flex">
+                          <React.Suspense>
+                            <ClientOnly>
+                              <Countdown
+                                date={new Date(urlItem.self_destruct)}
+                                zeroPadTime={1}
+                                renderer={CountdownRenderer}
+                              />
+                            </ClientOnly>
+                          </React.Suspense>
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap gap-1.5 w-16 min-w-[5rem] max-w-[5rem] items-center justify-between ml-auto border-l border-brand-grayish-green-100 p-2">
                       <button
@@ -336,6 +356,28 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
 };
 
 export default Home;
+
+const CountdownRenderer: React.FC<CountdownRenderProps> = ({
+  hours,
+  minutes,
+  seconds,
+  completed,
+}) => {
+  if (completed) {
+    return (
+      <span className="bg-red-error-text text-sm px-2 rounded">Expired</span>
+    );
+  } else {
+    return (
+      <div className="flex">
+        <span className="mr-1.5">Expires in:</span>
+        <span>
+          {hours}:{minutes}:{seconds}
+        </span>
+      </div>
+    );
+  }
+};
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const sessionToken = req.cookies["session_token"];

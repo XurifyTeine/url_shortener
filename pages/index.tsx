@@ -23,12 +23,6 @@ import TrashIcon from "@/src/components/Icons/TrashIcon";
 import ChevronIcon from "@/src/components/Icons/ChevronIcon";
 import { getCookie } from "cookies-next";
 
-const ClientOnly = React.lazy(() =>
-  import("@/src/components/ClientOnly").then((module) => ({
-    default: module.ClientOnly,
-  }))
-);
-
 interface HomeProps {
   userUrls: URLData[];
 }

@@ -42,7 +42,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<string | number>("");
   const [urlsInDeletionProgress, setUrlsInDeletionProgress] = useState<
-    string[]
+    { id: string; deleted: boolean; deleting: boolean }[]
   >([]);
 
   const { dispatchToast } = useToast();
@@ -104,11 +104,15 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
       console.error("Creating Short URL Error:", result.error);
       setIsLoading(false);
     } else if (data) {
+      const BASE_URL =
+        process.env.NODE_ENV === "production"
+          ? "https://nolongr.vercel.app"
+          : "http://localhost:3000";
       const newUrlData: URLData = {
         date_created: data.date_created,
         destination: data.destination,
         id: data.id,
-        url: `${window.location.origin}/${data.id}`,
+        url: `${BASE_URL}/${data.id}`,
         self_destruct: data.self_destruct,
       };
       setUrlData([newUrlData, ...(urlData ?? [])]);
@@ -160,12 +164,22 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     );
   };
 
-  const handleDeleteShortUrl = async (urlItem: URLData) => {
-    setUrlsInDeletionProgress([...urlsInDeletionProgress, urlItem.id]);
+  const handleDeleteShortUrl = async (selectedUrlItem: URLData, disabled: boolean) => {
+    if (disabled) return;
+
+    const newUrlInDeletionProgress = {
+      id: selectedUrlItem.id,
+      deleted: false,
+      deleting: true,
+    };
+    setUrlsInDeletionProgress([
+      ...urlsInDeletionProgress,
+      newUrlInDeletionProgress,
+    ]);
     const sessionToken = getCookie("session_token");
     const url = sessionToken
-      ? `/api/delete-url?id=${urlItem.id}&session_token=${sessionToken}`
-      : `/api/delete-url?id=${urlItem.id}`;
+      ? `/api/delete-url?id=${selectedUrlItem.id}&session_token=${sessionToken}`
+      : `/api/delete-url?id=${selectedUrlItem.id}`;
     const response = await fetch(url, {
       credentials: "include",
       headers: {
@@ -177,12 +191,28 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     const result: URLDataNextAPI = await response.json();
     const data = result?.result as URLData;
     if (data) {
-      const newUrlData = urlData.filter((item) => item.id !== urlItem.id);
       const newUrlsInDeletionProgress = urlsInDeletionProgress.filter(
-        (urlId) => urlId !== urlItem.id
+        (url) => url.deleted === true
       );
-      setUrlsInDeletionProgress(newUrlsInDeletionProgress);
-      setUrlData(newUrlData);
+
+      const newUrlInDeletionProgress = {
+        id: selectedUrlItem.id,
+        deleted: true,
+        deleting: false,
+      };
+      setUrlsInDeletionProgress([
+        ...newUrlsInDeletionProgress,
+        newUrlInDeletionProgress,
+      ]);
+
+      const result = urlData.filter((urlItem) => {
+        if (selectedUrlItem.id === urlItem.id) return false;
+        const found = urlsInDeletionProgress.find(
+          (url) => url.id === urlItem.id
+        );
+        return found?.id !== urlItem.id;
+      });
+      setUrlData(result);
     }
   };
 
@@ -240,7 +270,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
               className="bg-brand-grayish-green-300 text-white w-32 px-2 py-0.5 rounded-sm flex items-center justify-between"
               onClick={handleToggleShowAdvanced}
             >
-              Advanced{" "}
+              Advanced
               <span className={showAdvanced ? "rotate-180" : undefined}>
                 <ChevronIcon />
               </span>
@@ -275,9 +305,9 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         {Array.isArray(urlData) &&
           urlData.length > 0 &&
           urlData.map((urlItem) => {
-            const isTryingToDelete = urlsInDeletionProgress.includes(
-              urlItem.id
-            );
+            const isTryingToDelete = Boolean(urlsInDeletionProgress.find((url) => {
+              return url.id === urlItem.id && url.deleting === true;
+            }));
             return (
               <ErrorBoundary name="url-list" key={urlItem.id}>
                 <div className="flex mt-2">
@@ -332,9 +362,14 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                   </div>
                   <button
                     className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
-                    onClick={() => handleDeleteShortUrl(urlItem)}
+                    disabled={isTryingToDelete}
+                    onClick={() => handleDeleteShortUrl(urlItem, isTryingToDelete)}
                   >
-                    {isTryingToDelete ? <LoadingIcon /> : <TrashIcon />}
+                    {isTryingToDelete ? (
+                      <LoadingIcon />
+                    ) : (
+                      <TrashIcon />
+                    )}
                   </button>
                 </div>
               </ErrorBoundary>
@@ -409,3 +444,19 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   }
   return { props: {} };
 };
+
+import { useEffect } from "react";
+
+export function useDebounce<T>(value: T, delay?: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}

@@ -1,7 +1,6 @@
 import {
   Dispatch,
   SetStateAction,
-  startTransition,
   useCallback,
   useEffect,
   useState,
@@ -35,7 +34,7 @@ export function useLocalStorage<T>(
     }
   }, [initialValue, key]);
 
-  const [storedValue, setStoredValue] = useState<T>(readValue);
+  const [storedValue, setStoredValue] = useState<T>(() => initialValue);
 
   const setValue: SetValue<T> = useEventCallback((value) => {
     if (typeof window === "undefined") {
@@ -47,9 +46,7 @@ export function useLocalStorage<T>(
     try {
       const newValue = value instanceof Function ? value(storedValue) : value;
       window.localStorage.setItem(key, JSON.stringify(newValue));
-      startTransition(() => {
-        setStoredValue(newValue);
-      });
+      setStoredValue(newValue);
       window.dispatchEvent(new Event("local-storage"));
     } catch (error) {
       console.warn(`Error setting localStorage key “${key}”:`, error);
@@ -57,9 +54,7 @@ export function useLocalStorage<T>(
   });
 
   useEffect(() => {
-    startTransition(() => {
-      setStoredValue(readValue());
-    })
+    setStoredValue(readValue());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -68,9 +63,7 @@ export function useLocalStorage<T>(
       if ((event as StorageEvent)?.key && (event as StorageEvent).key !== key) {
         return;
       }
-      startTransition(() => {
-        setStoredValue(readValue());
-      });
+      setStoredValue(readValue());
     },
     [key, readValue]
   );

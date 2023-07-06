@@ -164,7 +164,10 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     );
   };
 
-  const handleDeleteShortUrl = async (selectedUrlItem: URLData, disabled: boolean) => {
+  const handleDeleteShortUrl = async (
+    selectedUrlItem: URLData,
+    disabled: boolean
+  ) => {
     if (disabled) return;
 
     const newUrlInDeletionProgress = {
@@ -305,9 +308,11 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         {Array.isArray(urlData) &&
           urlData.length > 0 &&
           urlData.map((urlItem) => {
-            const isTryingToDelete = Boolean(urlsInDeletionProgress.find((url) => {
-              return url.id === urlItem.id && url.deleting === true;
-            }));
+            const isTryingToDelete = Boolean(
+              urlsInDeletionProgress.find((url) => {
+                return url.id === urlItem.id && url.deleting === true;
+              })
+            );
             return (
               <ErrorBoundary name="url-list" key={urlItem.id}>
                 <div className="flex mt-2">
@@ -363,13 +368,11 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                   <button
                     className="ml-1.5 px-1 bg-light-danger hover:bg-red-500"
                     disabled={isTryingToDelete}
-                    onClick={() => handleDeleteShortUrl(urlItem, isTryingToDelete)}
+                    onClick={() =>
+                      handleDeleteShortUrl(urlItem, isTryingToDelete)
+                    }
                   >
-                    {isTryingToDelete ? (
-                      <LoadingIcon />
-                    ) : (
-                      <TrashIcon />
-                    )}
+                    {isTryingToDelete ? <LoadingIcon /> : <TrashIcon />}
                   </button>
                 </div>
               </ErrorBoundary>

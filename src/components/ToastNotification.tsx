@@ -25,7 +25,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
   const firstToast = toastsState?.[0];
   const marginTop = id === firstToast.id ? "mt-0" : `mt-[-3rem]`;
   const defaultClassName =
-    `animate-slide-in ${marginTop} relative right-2 top-2 flex items-center max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow`;
+    `animate-slide-in ${marginTop} relative right-2 top-2 flex items-center max-w-xs w-full p-4 text-gray-500 bg-white rounded-lg shadow`;
   const [className, setClassName] = React.useState(defaultClassName);
   const toastType = `toast-${type}`;
 

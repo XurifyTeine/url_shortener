@@ -25,3 +25,13 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.qr-code-canvas-wrapper {
+  width: 100%;
+  max-width: 300px;
+}
+
+.qr-code-canvas-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}

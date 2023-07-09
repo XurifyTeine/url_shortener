@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GetServerSideProps } from "next";
 import { useQRCode } from "next-qrcode";
 import Countdown, { CountdownRenderProps } from "react-countdown";
 import { getCookie } from "cookies-next";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
 
 import { useToast } from "@/src/context/ToastContext";
 import { useModal } from "@/src/context/ModalContext";
@@ -48,7 +50,8 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   const { dispatchToast } = useToast();
   const { dispatchModal } = useModal();
   const [, copy] = useCopyToClipboard();
-  const { Canvas: QRCodeCanvas } = useQRCode();
+  const { Canvas: QRCodeCanvas, Image } = useQRCode();
+  const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     setUrlData(userUrls);
@@ -155,11 +158,32 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     }
   };
 
+  const handleDownloadQRCodeImage = () => {
+    const container = ref.current;
+
+    if (container) {
+      html2canvas(container, {
+        scale: 5,
+        useCORS: true,
+      }).then((canvas) => {
+        canvas.toBlob((blob) => blob && saveAs(blob, "qr-code.png"));
+      });
+    }
+  };
+
   const handleOpenQRCodeModal = (urlItem: URLData) => {
     dispatchModal(
       "QR Code",
-      <div className="flex items-center justify-center text-black p-4">
-        <QRCodeCanvas text={urlItem.url} options={{ width: 300 }} />
+      <div className="flex flex-col items-center justify-center text-black p-4">
+        <div className="qr-code-canvas-wrapper" ref={ref}>
+          <QRCodeCanvas text={urlItem.url} options={{ scale: 10 }} />
+        </div>
+        <button
+          className="px-4 py-1 rounded-sm font-bold text-brand-dark-green-100 bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
+          onClick={handleDownloadQRCodeImage}
+        >
+          Download
+        </button>
       </div>
     );
   };
@@ -256,7 +280,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
               </ErrorBoundary>
             </div>
             <button
-              className="flex items-center justify-center text-brand-dark-green-100 rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
+              className="flex items-center justify-center rounded-r-sm px-2 whitespace-nowrap h-12 w-full md:w-44 mt-2 md:mt-0 font-bold text-brand-dark-green-100 bg-brand-neon-green-100 hover:bg-brand-neon-green-200 disabled:bg-brand-neon-green-100 duration-200"
               onClick={handleClickCreateShortURL}
               disabled={isLoading}
             >
@@ -447,8 +471,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   }
   return { props: {} };
 };
-
-import { useEffect } from "react";
 
 export function useDebounce<T>(value: T, delay?: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);

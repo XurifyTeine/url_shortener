@@ -2,9 +2,7 @@ import React from "react";
 import ToastNotification from "./ToastNotification";
 import { useToast } from "../context/ToastContext";
 
-interface StackableToastsProps {};
-
-export const StackableToasts: React.FC<StackableToastsProps> = () => {
+export const StackableToasts: React.FC = () => {
   const { state: toasts } = useToast();
   if (!Array.isArray(toasts)) return null;
   if (toasts.length < 1) return null;

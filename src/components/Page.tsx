@@ -6,7 +6,6 @@ import { useModal } from "@/src/context/ModalContext";
 import ErrorBoundary from "./ErrorBoundary";
 import PageHead from "./PageHead";
 import Modal from "./Modal";
-import StackableToasts from "./StackableToasts";
 
 const inter = Nunito({
   subsets: ["latin"],

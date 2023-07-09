@@ -5,10 +5,6 @@ import {
   ToastNotificationProps,
   ToastNotificationType,
 } from "../components/ToastNotification";
-import { createPortal } from "react-dom";
-import StackableToasts from "../components/StackableToasts";
-import { ClientOnly } from "../components/ClientOnly";
-import { isClientSide } from "../utils";
 
 export const ToastProvider: React.FC<React.PropsWithChildren> = ({
   children,

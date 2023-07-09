@@ -1,5 +1,6 @@
 import React from "react";
 import { useToast } from "../context/ToastContext";
+import { useTimeout } from "../hooks/useTimeout";
 
 export type ToastNotificationType =
   | "default"
@@ -9,7 +10,7 @@ export type ToastNotificationType =
   | "copy";
 
 export interface ToastNotificationProps {
-  id: number;
+  id: string;
   message: string;
   type: ToastNotificationType;
   duration: number;
@@ -24,25 +25,26 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
   const { dismissToast, state: toastsState } = useToast();
   const firstToast = toastsState?.[0];
   const marginTop = id === firstToast.id ? "mt-0" : `mt-[-3rem]`;
-  const defaultClassName =
-    `animate-slide-in ${marginTop} relative right-2 top-2 flex items-center max-w-xs w-full p-4 text-gray-500 bg-white rounded-lg shadow`;
+  const defaultClassName = `animate-slide-in ${marginTop} toasts-state-${toastsState.length} relative right-2 top-2 flex items-center max-w-xs w-full p-4 text-gray-500 bg-white rounded-lg shadow`;
   const [className, setClassName] = React.useState(defaultClassName);
-  const toastType = `toast-${type}`;
+  const toastType = `toast-${type}-${id}`;
+
+  const toastIds: string[] = toastsState.map((toast) => toast.id);
+
+  React.useEffect(() => {
+    setClassName(defaultClassName);
+  }, [defaultClassName]);
 
   const handleDismissToast = React.useCallback(() => {
     setClassName(`${defaultClassName} animate-slide-out`);
     setTimeout(() => {
       dismissToast(id);
-    }, 400);
-  }, [dismissToast, id, defaultClassName]);
+    }, 270);
+  }, [id, defaultClassName]);
 
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      handleDismissToast();
-    }, duration);
+  useTimeout(handleDismissToast, duration);
 
-    return () => clearTimeout(timeout);
-  }, [duration, handleDismissToast]);
+  console.log("toastsState", id, toastsState);
 
   const icon =
     type === "success" ? (
@@ -56,6 +58,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
     ) : (
       <DefaultIcon />
     );
+
+  if (!toastIds.includes(id)) return null;
 
   return (
     <div id={toastType} className={className} role="alert">

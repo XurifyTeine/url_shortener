@@ -1,31 +1,56 @@
 import React from "react";
+import { nanoid } from "nanoid";
 import { ToastContext } from "./ToastContext";
-import { ToastNotificationProps, ToastNotificationType } from "../components/ToastNotification";
+import {
+  ToastNotificationProps,
+  ToastNotificationType,
+} from "../components/ToastNotification";
+import { createPortal } from "react-dom";
+import StackableToasts from "../components/StackableToasts";
+import { ClientOnly } from "../components/ClientOnly";
 
 export const ToastProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [toasts, setToasts] = React.useState<ToastNotificationProps[]>([]);
 
-  const handleSetState = (message: string, type: ToastNotificationType, duration = 5000) => {
-    const prevId = toasts.length ? toasts[toasts.length - 1].id : 0;
-    setToasts([...(toasts ?? []), { message, type, duration, id: prevId + 1 }]);
-  };
+  const handleSetState = React.useCallback(
+    (message: string, type: ToastNotificationType, duration = 2000) => {
+      const id = nanoid();
+      setToasts((currentToasts) => [
+        ...currentToasts,
+        { message, type, duration, id },
+      ]);
+    },
+    [toasts]
+  );
 
-  const handleDismissToast = (id: number) => {
-    const newToasts = toasts.filter((toast) => toast.id !== id);
-    setToasts(newToasts);
-  };
+  const handleDismissToast = React.useCallback(
+    (id: string) => {
+      setToasts((currentToasts) =>
+        currentToasts.filter((toast) => toast.id !== id)
+      );
+    },
+    [toasts]
+  );
+
+  const contextValue = React.useMemo(
+    () => ({
+      state: toasts,
+      dispatchToast: handleSetState,
+      dismissToast: handleDismissToast,
+    }),
+    [toasts]
+  );
 
   return (
-    <ToastContext.Provider
-      value={{
-        state: toasts,
-        dispatchToast: handleSetState,
-        dismissToast: handleDismissToast,
-      }}
-    >
+    <ToastContext.Provider value={contextValue}>
       {children}
+
+      <ClientOnly>
+        {typeof document !== "undefined" && document?.body &&
+          createPortal(<StackableToasts />, document.body)}
+      </ClientOnly>
     </ToastContext.Provider>
   );
 };

@@ -56,16 +56,16 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
 
   const handleCreateShortURL = async () => {
     if (destinationUrl.trim() === "") {
-      dispatchToast("Please enter in a URL", "warning", 5000);
+      dispatchToast("Please enter in a URL", "warning");
       return;
     } else if (!URL_REGEX.test(destinationUrl)) {
-      dispatchToast("This is not a vaid URL", "danger", 5000);
+      dispatchToast("This is not a vaid URL", "danger");
       return;
     }
     const productionSiteUrled = new URL(PRODUCTION_SITE_URL);
     const destinationSiteUrled = new URL(destinationUrl);
     if (productionSiteUrled.hostname === destinationSiteUrled.hostname) {
-      dispatchToast("You cannot shorten this domain", "warning", 5000);
+      dispatchToast("You cannot shorten this domain", "warning");
       return;
     }
     const alreadyCreated = Array.isArray(urlData)

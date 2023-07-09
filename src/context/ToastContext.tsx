@@ -4,7 +4,7 @@ import { ToastNotificationProps, ToastNotificationType } from "../components/Toa
 export interface ToastContextInterface {
   state: ToastNotificationProps[];
   dispatchToast: ((message: string, type: ToastNotificationType, duration?: number) => void) | (() => void);
-  dismissToast: (id: number) => void;
+  dismissToast: (id: string) => void;
 }
 
 export const ToastContext = React.createContext<ToastContextInterface>({

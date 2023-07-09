@@ -1,7 +1,6 @@
 import React from "react";
 import { Nunito } from "next/font/google";
 
-import { useToast } from "@/src/context/ToastContext";
 import { useModal } from "@/src/context/ModalContext";
 
 import ErrorBoundary from "./ErrorBoundary";
@@ -16,7 +15,6 @@ const inter = Nunito({
 });
 
 export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { state: toastsState } = useToast();
   const { state: modalState } = useModal();
 
   return (
@@ -25,7 +23,6 @@ export const Page: React.FC<React.PropsWithChildren> = ({ children }) => {
       <ErrorBoundary name="global">
         <div style={inter.style}>{children}</div>
       </ErrorBoundary>
-      <StackableToasts toastsState={toastsState} />
       {modalState && <Modal title={modalState.title} body={modalState.body} />}
     </>
   );

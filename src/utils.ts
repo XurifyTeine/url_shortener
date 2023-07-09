@@ -8,5 +8,12 @@ export const getIdFromPathname = (pathname: string): string | null => {
   return null;
 };
 
-export const isClientSide = () => typeof window !== 'undefined';
-export const isServerSide = () => typeof window === 'undefined';
+export const isClientSide = () => typeof window !== "undefined";
+export const isServerSide = () => typeof window === "undefined";
+
+export const truncateText = (text: string, length: number) => {
+  if (text.length <= length) {
+    return text;
+  }
+  return `${text.slice(0, length)}...`;
+};

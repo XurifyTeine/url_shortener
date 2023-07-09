@@ -25,6 +25,7 @@ import QRCodeIcon from "@/src/components/Icons/QRCodeIcon";
 import GitHubLink from "@/src/components/Icons/GitHubLink";
 import TrashIcon from "@/src/components/Icons/TrashIcon";
 import ChevronIcon from "@/src/components/Icons/ChevronIcon";
+import { truncateText } from "@/src/utils";
 
 const ClientOnly = React.lazy(() =>
   import("@/src/components/ClientOnly").then((module) => ({
@@ -50,7 +51,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   const { dispatchToast } = useToast();
   const { dispatchModal } = useModal();
   const [, copy] = useCopyToClipboard();
-  const { Canvas: QRCodeCanvas, Image } = useQRCode();
+  const { Canvas: QRCodeCanvas } = useQRCode();
   const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -332,11 +333,14 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         {Array.isArray(urlData) &&
           urlData.length > 0 &&
           urlData.map((urlItem) => {
+            const [showFull, setShowFull] = React.useState(false);
+
             const isTryingToDelete = Boolean(
               urlsInDeletionProgress.find((url) => {
                 return url.id === urlItem.id && url.deleting === true;
               })
             );
+
             return (
               <ErrorBoundary name="url-list" key={urlItem.id}>
                 <div className="flex mt-2">
@@ -354,11 +358,12 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
                       </span>
                       <span className="flex">
                         <span className="mr-1.5">Destination:</span>
-                        <input
-                          className="break-all w-full px-1 bg-brand-green-400 text-gray-500 rounded-sm"
-                          defaultValue={urlItem.destination}
-                          disabled={true}
-                        />
+                        <span
+                          className="break-all font-semibold cursor-pointer hover:text-gray-500"
+                          onClick={() => setShowFull(true)}
+                        >
+                          {showFull ? urlItem.destination : truncateText(urlItem.destination, 35)}
+                        </span>
                       </span>
                       {urlItem.self_destruct && (
                         <span className="flex">

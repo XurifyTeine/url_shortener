@@ -15,7 +15,7 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({
   const [toasts, setToasts] = React.useState<ToastNotificationProps[]>([]);
 
   const handleSetState = React.useCallback(
-    (message: string, type: ToastNotificationType, duration = 2000) => {
+    (message: string, type: ToastNotificationType, duration = 5000) => {
       const id = nanoid();
       setToasts((currentToasts) => [
         ...currentToasts,

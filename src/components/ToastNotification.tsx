@@ -42,9 +42,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
     }, 270);
   }, [id, defaultClassName]);
 
-  useTimeout(handleDismissToast, duration);
-
-  console.log("toastsState", id, toastsState);
+  useTimeout(handleDismissToast, duration + 270);
 
   const icon =
     type === "success" ? (

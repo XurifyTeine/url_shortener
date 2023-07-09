@@ -8,6 +8,7 @@ import {
 import { createPortal } from "react-dom";
 import StackableToasts from "../components/StackableToasts";
 import { ClientOnly } from "../components/ClientOnly";
+import { isClientSide } from "../utils";
 
 export const ToastProvider: React.FC<React.PropsWithChildren> = ({
   children,
@@ -46,11 +47,6 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-
-      <ClientOnly>
-        {typeof document !== "undefined" && document?.body &&
-          createPortal(<StackableToasts />, document.body)}
-      </ClientOnly>
     </ToastContext.Provider>
   );
 };

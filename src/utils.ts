@@ -7,3 +7,6 @@ export const getIdFromPathname = (pathname: string): string | null => {
   }
   return null;
 };
+
+export const isClientSide = () => typeof window !== 'undefined';
+export const isServerSide = () => typeof window === 'undefined';

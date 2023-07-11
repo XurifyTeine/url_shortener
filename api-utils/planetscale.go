@@ -54,7 +54,7 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 	}
 
 	if selfDestruct != 0 {
-		selfDestructDuration := time.Millisecond * time.Duration(selfDestruct)
+		selfDestructDuration := time.Second * time.Duration(selfDestruct)
 		newUrlData.SelfDestruct = time.Now().UTC().Add(selfDestructDuration).Format(time.RFC3339)
 	} else {
 		newUrlData.SelfDestruct = ""

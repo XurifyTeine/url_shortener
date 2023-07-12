@@ -152,11 +152,11 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		log.Print("(handleRouteCreateShortUrl) decode error:", err)
 	}
 
-	hashedPassword := ""
+	passwordHash := ""
 
 	if creds.Password != "" {
-		hashedPasswordResult, _ := HashPassword(creds.Password)
-		hashedPassword = hashedPasswordResult
+		passwordHashResult, _ := HashPassword(creds.Password)
+		passwordHash = passwordHashResult
 	}
 
 	destinationSiteUrled, _ := url.Parse(destination)
@@ -182,7 +182,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		return
 	}
 
-	urlData, err := CreateUrl(destination, selfDestruct, sessionToken, hashedPassword)
+	urlData, err := CreateUrl(destination, selfDestruct, sessionToken, passwordHash)
 
 	if err != nil {
 		errorMessage := ErrorResponse{
@@ -198,6 +198,16 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 }
 
 func handleRouteGetAllUrls(context *gin.Context) {
+	apiKey := context.Query("api_key")
+
+	if apiKey != GetApiKey() {
+		errorMessageIncorrectToken := ErrorResponse{
+			Message:   "Incorrect API key was provided",
+			ErrorCode: http.StatusUnauthorized,
+		}
+		context.JSON(http.StatusUnauthorized, map[string]ErrorResponse{"error": errorMessageIncorrectToken})
+		return
+	}
 	urls, err := GetUrls()
 	if err != nil {
 		log.Println("(handleRouteGetAllUrls) error:", err)

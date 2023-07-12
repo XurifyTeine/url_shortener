@@ -162,7 +162,7 @@ export const UrlItem: React.FC<{
               <span className="mr-1.5">Destination:</span>
               <span
                 className="break-all font-semibold cursor-pointer hover:text-brand-grayish-green-300"
-                onClick={() => setShowFull(true)}
+                onClick={() => setShowFull(!showFull)}
               >
                 {showFull
                   ? urlData.destination

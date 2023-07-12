@@ -12,11 +12,11 @@ import (
 )
 
 func GetEnvironment() string {
-	return os.Getenv("APP_ENV")
+	return GoDotEnvVariable("APP_ENV")
 }
 
 func GetApiKey() string {
-	return os.Getenv("NOLONGR_SERVER_API_KEY")
+	return GoDotEnvVariable("NOLONGR_SERVER_API_KEY")
 }
 
 func GoDotEnvVariable(key string) string {

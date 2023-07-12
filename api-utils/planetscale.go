@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"bufio"
 	"log"
+	"net/http"
 	"time"
 
 	"database/sql"
@@ -30,12 +32,29 @@ type URLData struct {
 }
 
 func CreateUrl(url string, selfDestruct int64, sessionToken string, password string) (URLData, error) {
-	newURLID := randomSequence(6)
+	resp, err := http.Get(GetBaseUrl() + "/api/url-id-length")
+	if err != nil {
+		log.Print("(CreateUrl) /api/url-id-length", err)
+	}
+	defer resp.Body.Close()
+
+	urlIdLength := bufio.NewScanner(resp.Body).Text()
+	log.Print("urlIdLength", urlIdLength, GetBaseUrl()+"/api/url-id-length", GetEnvironment())
+
+	const ID_LENGTH = 2
+	newURLID := randomSequence(ID_LENGTH)
 
 	doesUrlIdExist := checkIfUrlIdExists(newURLID)
 
+	doesUrlIdExistCounter := 0
 	for doesUrlIdExist {
-		newURLID = randomSequence(6)
+		newURLID = randomSequence(ID_LENGTH)
+		if doesUrlIdExistCounter > 10 {
+			log.Print("(CreateUrl) POTENTIALLY CRITICAL - URL ID LENGTH NEEDS TO BE INCREMENTED")
+			newURLID = randomSequence(ID_LENGTH + 1)
+		} else {
+			doesUrlIdExistCounter = doesUrlIdExistCounter + 1
+		}
 	}
 
 	var sqlPassword = sql.NullString{String: password, Valid: false}
@@ -53,7 +72,7 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		Password:     sqlPassword,
 	}
 
-	if selfDestruct != 0 {
+	if selfDestruct > 0 {
 		selfDestructDuration := time.Second * time.Duration(selfDestruct)
 		newUrlData.SelfDestruct = time.Now().UTC().Add(selfDestructDuration).Format(time.RFC3339)
 	} else {

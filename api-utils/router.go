@@ -76,7 +76,7 @@ func RegisterRouter(router *gin.RouterGroup) {
 func RegisterCors(router *gin.Engine) {
 	allowOrigins := []string{PRODUCTION_SITE_URL}
 	if GetEnvironment() == "development" {
-		allowOrigins = []string{"http://localhost:3000", PRODUCTION_SITE_URL}
+		allowOrigins = []string{DEV_SITE_URL, PRODUCTION_SITE_URL}
 	}
 
 	router.Use(cors.New(cors.Config{
@@ -87,7 +87,7 @@ func RegisterCors(router *gin.Engine) {
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
 			if GetEnvironment() == "development" {
-				containsOrigin := slices.Contains(allowOrigins, "http://localhost:3000")
+				containsOrigin := slices.Contains(allowOrigins, DEV_SITE_URL)
 				return containsOrigin
 			} else {
 				containsOrigin := slices.Contains(allowOrigins, PRODUCTION_SITE_URL)

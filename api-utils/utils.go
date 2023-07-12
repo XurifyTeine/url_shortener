@@ -27,7 +27,16 @@ func GoDotEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
-const PRODUCTION_SITE_URL = "https://nolongr.vercel.app/"
+const PRODUCTION_SITE_URL = "https://nolongr.vercel.app"
+const DEV_SITE_URL = "http://localhost:3000"
+
+func GetBaseUrl() string {
+	if GetEnvironment() == "production" {
+		return PRODUCTION_SITE_URL
+	} else {
+		return DEV_SITE_URL
+	}
+}
 
 //const FIREBASEPROJECTID = "nolongr-xurifyteine"
 

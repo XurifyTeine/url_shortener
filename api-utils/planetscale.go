@@ -50,9 +50,7 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		}
 	}
 
-	urlIdLength := urlIdLengthResponse["result"].(int)
-
-	log.Print("urlIdLength", urlIdLength)
+	urlIdLength := int(urlIdLengthResponse["result"].(float64))
 
 	DEFAULT_ID_LENGTH := 2
 

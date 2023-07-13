@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
@@ -50,12 +51,11 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		}
 	}
 
+	defaultIdLength := 2
 	urlIdLength := int(urlIdLengthResponse["result"].(float64))
 
-	DEFAULT_ID_LENGTH := 2
-
-	if urlIdLength >= DEFAULT_ID_LENGTH {
-		urlIdLength = urlIdLength + 1
+	if urlIdLength != defaultIdLength {
+		urlIdLength = int(math.Max(float64(defaultIdLength), float64(urlIdLength)))
 	}
 
 	newURLID := randomSequence(urlIdLength)
@@ -83,7 +83,7 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		Destination:  url,
 		ID:           newURLID,
 		DateCreated:  time.Now().UTC().Format(time.RFC3339),
-		URL:          PRODUCTION_SITE_URL + newURLID,
+		URL:          PRODUCTION_SITE_URL + "/" + newURLID,
 		SessionToken: sessionToken,
 		Password:     sqlPassword,
 	}

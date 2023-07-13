@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -32,26 +33,43 @@ type URLData struct {
 }
 
 func CreateUrl(url string, selfDestruct int64, sessionToken string, password string) (URLData, error) {
-	resp, err := http.Get(GetBaseUrl() + "/api/url-id-length")
+	resp, err := http.Get("https://nolongr.vercel.app/api/url-id-length")
 	if err != nil {
 		log.Print("(CreateUrl) /api/url-id-length", err)
 	}
 	defer resp.Body.Close()
 
-	urlIdLength := bufio.NewScanner(resp.Body).Text()
-	log.Print("urlIdLength", urlIdLength, GetBaseUrl()+"/api/url-id-length", GetEnvironment())
+	var urlIdLengthResponse map[string]interface{}
 
-	const ID_LENGTH = 2
-	newURLID := randomSequence(ID_LENGTH)
+	scanner := bufio.NewScanner(resp.Body)
+	for i := 0; scanner.Scan() && i < 5; i++ {
+		log.Println(scanner.Text())
+		byt := []byte(scanner.Text())
+		if err := json.Unmarshal(byt, &urlIdLengthResponse); err != nil {
+			panic(err)
+		}
+	}
+
+	urlIdLength := urlIdLengthResponse["result"].(int)
+
+	log.Print("urlIdLength", urlIdLength)
+
+	DEFAULT_ID_LENGTH := 2
+
+	if urlIdLength >= DEFAULT_ID_LENGTH {
+		urlIdLength = urlIdLength + 1
+	}
+
+	newURLID := randomSequence(urlIdLength)
 
 	doesUrlIdExist := checkIfUrlIdExists(newURLID)
 
 	doesUrlIdExistCounter := 0
 	for doesUrlIdExist {
-		newURLID = randomSequence(ID_LENGTH)
+		newURLID = randomSequence(urlIdLength)
 		if doesUrlIdExistCounter > 10 {
 			log.Print("(CreateUrl) POTENTIALLY CRITICAL - URL ID LENGTH NEEDS TO BE INCREMENTED")
-			newURLID = randomSequence(ID_LENGTH + 1)
+			newURLID = randomSequence(urlIdLength + 1)
 		} else {
 			doesUrlIdExistCounter = doesUrlIdExistCounter + 1
 		}

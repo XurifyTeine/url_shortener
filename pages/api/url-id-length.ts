@@ -5,6 +5,6 @@ export default async function handler(
   _request: NextApiRequest,
   res: NextApiResponse
 ) {
-  const urlIdLength = await get("url_id_length");
-  return res.status(200).send({ result: urlIdLength });
+  const data = await get("url_id_length");
+  return res.status(200).send({ result: data });
 }

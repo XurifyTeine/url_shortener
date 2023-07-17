@@ -159,7 +159,7 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
 
   return (
     <main className="relative min-h-screen flex flex-col items-center p-2 bg-brand-green-200 pt-32">
-      <h1 className="text-white text-4xl uppercase mb-5 font-bold">
+      <h1 className="text-white text-center text-4xl uppercase mb-5 font-bold">
         URL Shortener
       </h1>
       <div className="items-center justify-center rounded-sm w-full md:max-w-xl p-6 bg-brand-green-300 shadow">

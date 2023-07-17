@@ -1,11 +1,13 @@
 export interface URLData {
-  destination: string;
   id: string;
   date_created: string;
-  url: string;
-  self_destruct: string;
+  destination: string;
+  max_page_hits: number;
+  page_hits: number;
+  password?: string | null;
+  self_destruct: string | null;
   session_token?: string | null;
-  password?: { String: string; Valid: boolean } | null;
+  url: string;
 }
 
 export interface URLError {

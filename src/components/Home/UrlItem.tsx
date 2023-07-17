@@ -8,7 +8,7 @@ import html2canvas from "html2canvas";
 import { useToast } from "@/src/context/ToastContext";
 import { useModal } from "@/src/context/ModalContext";
 import { useCopyToClipboard } from "@/src/hooks";
-import { truncateText } from "@/src/utils";
+import { encodeObjectToQueryParams, truncateText } from "@/src/utils";
 import { URLData, URLDataNextAPI } from "@/src/interfaces";
 
 import ClipboardIcon from "@/src/components/Icons/ClipboardIcon";
@@ -104,10 +104,14 @@ export const UrlItem: React.FC<{
         ...urlsInDeletionProgress,
         newUrlInDeletionProgress,
       ]);
+
       const sessionToken = getCookie("session_token");
-      const url = sessionToken
-        ? `/api/delete-url?id=${selectedUrlItem.id}&session_token=${sessionToken}`
-        : `/api/delete-url?id=${selectedUrlItem.id}`;
+      const urlParams = encodeObjectToQueryParams({
+        id: selectedUrlItem.id,
+        session_token: sessionToken,
+      });
+
+      const url = `/api/delete-url?${urlParams}`;
       const response = await fetch(url, {
         credentials: "include",
         headers: {
@@ -116,8 +120,10 @@ export const UrlItem: React.FC<{
         },
         method: "DELETE",
       });
+    
       const result: URLDataNextAPI = await response.json();
       const data = result?.result as URLData;
+
       if (data) {
         const newUrlsInDeletionProgress = urlsInDeletionProgress.filter(
           (url) => url.deleted === true

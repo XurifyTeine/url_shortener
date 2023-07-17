@@ -17,6 +17,7 @@ import LoadingIcon from "@/src/components/Icons/LoadingIcon";
 import GitHubLink from "@/src/components/Icons/GitHubLink";
 import ChevronIcon from "@/src/components/Icons/ChevronIcon";
 import { UrlItem } from "@/src/components/Home/UrlItem";
+import { encodeObjectToQueryParams } from "@/src/utils";
 
 interface HomeProps {
   userUrls: URLData[];
@@ -26,9 +27,12 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   const [urlData, setUrlData] = useLocalStorage<URLData[]>("urls", userUrls);
   const [destinationUrl, setDestinationUrl] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [maxPageHits, setMaxPageHits] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState<string | number>("");
+  const [selectedDuration, setSelectedDuration] = useState<number | undefined>(
+    undefined
+  );
   const [urlsInDeletionProgress, setUrlsInDeletionProgress] = useState<
     { id: string; deleted: boolean; deleting: boolean }[]
   >([]);
@@ -63,9 +67,13 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
     if (isLoading) return;
     setIsLoading(true);
 
-    const url = selectedDuration
-      ? `/api/urls?destination=${destinationUrl}&self_destruct=${selectedDuration}`
-      : `/api/urls?destination=${destinationUrl}`;
+    const urlParams = encodeObjectToQueryParams({
+      destination: destinationUrl,
+      self_destruct: selectedDuration,
+      max_page_hits: maxPageHits,
+    });
+
+    const url = `/api/urls?${urlParams}`;
     const response = await fetch(url, {
       credentials: "include",
       headers: {
@@ -99,6 +107,8 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
         id: data.id,
         url: `${BASE_URL}/${data.id}`,
         self_destruct: data.self_destruct,
+        page_hits: data.page_hits,
+        max_page_hits: data.max_page_hits,
       };
       setUrlData([newUrlData, ...(urlData ?? [])]);
       setIsLoading(false);
@@ -133,8 +143,13 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
   };
 
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newDuration = e.target.value;
+    const newDuration = Number(e.target.value);
     setSelectedDuration(newDuration);
+  };
+
+  const handleChangeMaxPageHits = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    setMaxPageHits(value);
   };
 
   const handleToggleShowAdvanced = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -192,29 +207,41 @@ export const Home: React.FC<HomeProps> = ({ userUrls }) => {
               </span>
             </button>
             {showAdvanced && (
-              <div className="w-full flex flex-col sm:flex-row mt-2 gap-2">
-                <div className="text-black">
-                  <select
-                    id="durations"
-                    onChange={handleDurationChange}
-                    className="bg-gray-50 px-2 w-full sm:w-40 h-8 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block"
-                  >
-                    {selfDestructDurations.map((duration) => (
-                      <option key={duration.label} value={duration.value}>
-                        {duration.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <>
                 <input
-                  className="h-8 py-2 px-3 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
+                  className="h-8 py-2 px-3 mt-2 bg-white rounded-sm text-gray-600 w-full focus:outline-none placeholder:text-gray-400"
                   value={password}
                   onChange={handleChangePassword}
                   id="password"
                   type="password"
                   placeholder="Password"
                 />
-              </div>
+                <div className="w-full flex flex-col sm:flex-row mt-2 gap-2">
+                  <div className="text-black">
+                    <select
+                      id="durations"
+                      onChange={handleDurationChange}
+                      className="bg-gray-50 px-2 w-full sm:w-40 h-8 outline-none text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block"
+                    >
+                      {selfDestructDurations.map((duration) => (
+                        <option key={duration.label} value={duration.value}>
+                          {duration.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <input
+                    className="h-8 py-2 px-3 w-full sm:w-40 bg-white rounded-sm text-gray-600 focus:outline-none placeholder:text-gray-400"
+                    placeholder="Max page hits"
+                    value={maxPageHits}
+                    onChange={handleChangeMaxPageHits}
+                    id="max-page-hits"
+                    min={0}
+                    max={10000}
+                    type="number"
+                  />
+                </div>
+              </>
             )}
           </div>
         </form>
@@ -251,29 +278,34 @@ export default Home;
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const sessionToken = req.cookies["session_token"];
 
-  if (sessionToken) {
-    const url = `${BASE_URL}/user-session-urls?session_token=${sessionToken}`;
+  try {
+    if (sessionToken) {
+      const url = `${BASE_URL}/user-session-urls?session_token=${sessionToken}`;
 
-    const urlDataRequest = await fetch(url, {
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "GET",
-    });
+      const urlDataRequest = await fetch(url, {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
 
-    const urlDataResponse = await urlDataRequest.json();
+      const urlDataResponse = await urlDataRequest.json();
 
-    const result = urlDataResponse?.result;
+      const result = urlDataResponse?.result;
 
-    const props: HomeProps = {
-      userUrls: Array.isArray(result) ? result : [],
-    };
+      const props: HomeProps = {
+        userUrls: Array.isArray(result) ? result : [],
+      };
 
-    return {
-      props,
-    };
+      return {
+        props,
+      };
+    }
+  } catch {
+    return { props: {} };
   }
+
   return { props: {} };
 };

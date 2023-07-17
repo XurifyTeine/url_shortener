@@ -20,11 +20,8 @@ export const RedirectPage: React.FC<RedirectPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log(hashedPassword, redirectionUrl);
-
   const handleChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log(value);
     setPassword(value);
   };
 
@@ -103,9 +100,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
   try {
     const url = `${BASE_URL}/urls/${shortId}`;
-
     const response = await fetch(url);
-    const result: URLDataResponse = await response.json();
+    const result = await response.json();
     const data: URLDataResponse | null = result || null;
 
     if (!data) {
@@ -118,7 +114,32 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       console.error(`SERVERSIDE [ID] PAGE ERROR: ${shortId}`, error);
       return { notFound: true };
     } else if (data && data.result && data.result.destination) {
-      const hashedPassword = data.result?.password?.["String"]?.trim() || null;
+      const apiKey = process.env.NOLONGR_SERVER_API_KEY;
+      const urlDataAfterPageHitResponse = await fetch(
+        `${BASE_URL}/urls/page-views/${shortId}?api_key=${apiKey}`
+      );
+      const urlDataAfterPageHitResult =
+        await urlDataAfterPageHitResponse.json();
+      const urlDataAfterPageHitData: URLDataResponse | null =
+        urlDataAfterPageHitResult || null;
+
+      if (
+        urlDataAfterPageHitData?.result &&
+        urlDataAfterPageHitData?.result?.max_page_hits !== 0 &&
+        urlDataAfterPageHitData?.result?.max_page_hits <
+          urlDataAfterPageHitData?.result?.page_hits
+      ) {
+        return { notFound: true };
+      }
+
+      const isPassedSelfDestruct = data.result?.self_destruct
+        ? new Date(data.result.self_destruct).getTime() < new Date().getTime()
+        : false;
+      if (isPassedSelfDestruct) {
+        return { notFound: true };
+      }
+
+      const hashedPassword = data.result?.password?.trim() || null;
       if (hashedPassword) {
         return {
           props: {
@@ -126,20 +147,14 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
             redirectionUrl: data.result.destination,
           },
         };
-      } else {
-        const isPassedSelfDestruct = data.result?.self_destruct ? new Date(data.result.self_destruct).getTime() < new Date().getTime() : false;
-      
-        if (isPassedSelfDestruct) {
-          return { notFound: true };
-        }
-        
-        return {
-          redirect: {
-            destination: data.result.destination,
-            permanent: false,
-          },
-        };
       }
+
+      return {
+        redirect: {
+          destination: data.result.destination,
+          permanent: false,
+        },
+      };
     }
   } catch (err) {
     return { notFound: true };

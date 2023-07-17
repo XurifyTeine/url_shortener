@@ -65,6 +65,7 @@ func RegisterRouter(router *gin.RouterGroup) {
 	//OTHERS
 	router.GET("/api/set-cookie", setCookieHandler)
 	router.GET("/api/get-cookie", getCookieHandler)
+	router.GET("/api/urls/page-views/:id", handleRouteIncrementPageView)
 	//ADMIN
 	router.GET("/api/urls", handleRouteGetAllUrls)
 	router.GET("/api/expired-urls", handleRouteGetAllExpiredUrls)
@@ -120,9 +121,10 @@ func handleRouteGetNewShortId(context *gin.Context) {
 
 type CreateShortUrlRequestBody struct {
 	Destination  string `json:"destination"`
-	URL          string `json:"url"`
-	SelfDestruct string `json:"self_destruct"`
+	MaxPageHits  string `json:"max_page_hits"`
 	Password     string `json:"password"`
+	SelfDestruct string `json:"self_destruct"`
+	URL          string `json:"url"`
 }
 
 func handleRouteFindURLById(context *gin.Context) {
@@ -143,8 +145,8 @@ func handleRouteFindURLById(context *gin.Context) {
 
 func handleRouteCreateShortUrl(context *gin.Context) {
 	destination := context.Query("destination")
-	selfDestructString := context.Query("self_destruct")
-	selfDestruct, _ := strconv.ParseInt(selfDestructString, 10, 64)
+	maxPageHitsString := (context.Query("max_page_hits"))
+	maxPageHits, _ := strconv.ParseInt(maxPageHitsString, 10, 64)
 
 	creds := &CreateShortUrlRequestBody{}
 	err := json.NewDecoder(context.Request.Body).Decode(creds)
@@ -152,11 +154,21 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		log.Print("(handleRouteCreateShortUrl) decode error:", err)
 	}
 
-	passwordHash := ""
+	var selfDestructPtr *int64 = nil
+	selfDestruct := selfDestructPtr
+
+	selfDestructString := context.Query("self_destruct")
+	if selfDestructString != "" {
+		selfDestructResult, _ := strconv.ParseInt(selfDestructString, 10, 64)
+		selfDestruct = &selfDestructResult
+	}
+
+	var passwordHashPtr *string = nil
+	passwordHash := passwordHashPtr
 
 	if creds.Password != "" {
 		passwordHashResult, _ := HashPassword(creds.Password)
-		passwordHash = passwordHashResult
+		passwordHash = &passwordHashResult
 	}
 
 	destinationSiteUrled, _ := url.Parse(destination)
@@ -182,7 +194,7 @@ func handleRouteCreateShortUrl(context *gin.Context) {
 		return
 	}
 
-	urlData, err := CreateUrl(destination, selfDestruct, sessionToken, passwordHash)
+	urlData, err := CreateUrl(destination, selfDestruct, sessionToken, passwordHash, maxPageHits)
 
 	if err != nil {
 		errorMessage := ErrorResponse{
@@ -258,6 +270,32 @@ func handleRouteDeleteId(context *gin.Context) {
 		}
 		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
 		log.Println("(handleRouteDeleteId) error: ", err)
+	}
+	context.JSON(http.StatusOK, map[string]interface{}{"result": result})
+}
+
+func handleRouteIncrementPageView(context *gin.Context) {
+	apiKey := context.Query("api_key")
+
+	if apiKey != GetApiKey() {
+		errorMessageIncorrectToken := ErrorResponse{
+			Message:   "Incorrect API key was provided",
+			ErrorCode: http.StatusUnauthorized,
+		}
+		context.JSON(http.StatusUnauthorized, map[string]ErrorResponse{"error": errorMessageIncorrectToken})
+		return
+	}
+
+	id := context.Param("id")
+	result, err := IncrementSingleUrlPageHit(id)
+	if err != nil {
+		errorMessage := ErrorResponse{
+			Message:   "Failed to increment page view",
+			Error:     err.Error(),
+			ErrorCode: http.StatusInternalServerError,
+		}
+		context.JSON(http.StatusNotFound, map[string]ErrorResponse{"error": errorMessage})
+		log.Println("(handleRouteIncrementPageView) error: ", err)
 	}
 	context.JSON(http.StatusOK, map[string]interface{}{"result": result})
 }

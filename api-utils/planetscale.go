@@ -3,9 +3,11 @@ package utils
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"database/sql"
@@ -24,16 +26,18 @@ func getNewPlanetScaleClient() (*sql.DB, error) {
 }
 
 type URLData struct {
-	Destination  string         `json:"destination"`
-	ID           string         `json:"id"`
-	DateCreated  string         `json:"date_created"`
-	URL          string         `json:"url"`
-	SelfDestruct string         `json:"self_destruct"`
-	SessionToken string         `json:"session_token"`
-	Password     sql.NullString `json:"password"`
+	ID           string  `json:"id"`
+	DateCreated  string  `json:"date_created"`
+	Destination  string  `json:"destination"`
+	MaxPageHits  int64   `json:"max_page_hits"`
+	PageHits     int64   `json:"page_hits"`
+	Password     *string `json:"password"`
+	SelfDestruct *string `json:"self_destruct"`
+	SessionToken string  `json:"session_token"`
+	URL          string  `json:"url"`
 }
 
-func CreateUrl(url string, selfDestruct int64, sessionToken string, password string) (URLData, error) {
+func CreateUrl(url string, selfDestruct *int64, sessionToken string, password *string, maxPageHits int64) (URLData, error) {
 	resp, err := http.Get("https://nolongr.vercel.app/api/url-id-length")
 	if err != nil {
 		log.Print("(CreateUrl) /api/url-id-length", err)
@@ -44,7 +48,6 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 
 	scanner := bufio.NewScanner(resp.Body)
 	for i := 0; scanner.Scan() && i < 5; i++ {
-		log.Println(scanner.Text())
 		byt := []byte(scanner.Text())
 		if err := json.Unmarshal(byt, &urlIdLengthResponse); err != nil {
 			panic(err)
@@ -73,38 +76,38 @@ func CreateUrl(url string, selfDestruct int64, sessionToken string, password str
 		}
 	}
 
-	var sqlPassword = sql.NullString{String: password, Valid: false}
+	var selfDestructString *string = nil
 
-	if password != "" {
-		sqlPassword = sql.NullString{String: password, Valid: true}
+	if selfDestruct != nil {
+		selfDestructDuration := time.Second * time.Duration(*selfDestruct)
+		selfDestruct := time.Now().UTC().Add(selfDestructDuration).Format(time.RFC3339)
+		selfDestructString = &selfDestruct
 	}
 
 	newUrlData := URLData{
-		Destination:  url,
 		ID:           newURLID,
 		DateCreated:  time.Now().UTC().Format(time.RFC3339),
-		URL:          PRODUCTION_SITE_URL + "/" + newURLID,
+		Destination:  url,
+		MaxPageHits:  maxPageHits,
+		Password:     password,
+		PageHits:     0,
 		SessionToken: sessionToken,
-		Password:     sqlPassword,
+		SelfDestruct: selfDestructString,
+		URL:          PRODUCTION_SITE_URL + "/" + newURLID,
 	}
 
-	if selfDestruct > 0 {
-		selfDestructDuration := time.Second * time.Duration(selfDestruct)
-		newUrlData.SelfDestruct = time.Now().UTC().Add(selfDestructDuration).Format(time.RFC3339)
-	} else {
-		newUrlData.SelfDestruct = ""
-	}
-
-	query := "INSERT INTO urls (id, destination, date_created, url, self_destruct, session_token, password) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO urls (id, date_created, destination, max_page_hits, page_hits, password, self_destruct, session_token, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	db, err := getNewPlanetScaleClient()
 	_, err = db.Exec(query,
 		newUrlData.ID,
-		newUrlData.Destination,
 		newUrlData.DateCreated,
-		newUrlData.URL,
+		newUrlData.Destination,
+		newUrlData.MaxPageHits,
+		newUrlData.PageHits,
+		newUrlData.Password,
 		newUrlData.SelfDestruct,
 		newUrlData.SessionToken,
-		newUrlData.Password,
+		newUrlData.URL,
 	)
 
 	if err != nil {
@@ -128,12 +131,14 @@ func GetUrls() ([]URLData, error) {
 		var urlData URLData
 		err := res.Scan(
 			&urlData.ID,
-			&urlData.Destination,
 			&urlData.DateCreated,
-			&urlData.URL,
+			&urlData.Destination,
+			&urlData.MaxPageHits,
+			&urlData.PageHits,
+			&urlData.Password,
 			&urlData.SelfDestruct,
 			&urlData.SessionToken,
-			&urlData.Password,
+			&urlData.URL,
 		)
 		if err != nil {
 			log.Print("(GetUrls) res.Scan", err)
@@ -146,16 +151,18 @@ func GetUrls() ([]URLData, error) {
 
 func GetSingleUrl(id string) (URLData, error) {
 	urlData := URLData{}
-	query := `SELECT * FROM urls WHERE id = ?`
+	query := "SELECT * FROM urls WHERE id = ?"
 	db, err := getNewPlanetScaleClient()
 	err = db.QueryRow(query, id).Scan(
 		&urlData.ID,
-		&urlData.Destination,
 		&urlData.DateCreated,
-		&urlData.URL,
+		&urlData.Destination,
+		&urlData.MaxPageHits,
+		&urlData.PageHits,
+		&urlData.Password,
 		&urlData.SelfDestruct,
 		&urlData.SessionToken,
-		&urlData.Password,
+		&urlData.URL,
 	)
 	if err != nil {
 		log.Println("(GetSingleUrl) db.Exec", err)
@@ -164,20 +171,39 @@ func GetSingleUrl(id string) (URLData, error) {
 	return urlData, err
 }
 
+func IncrementSingleUrlPageHit(id string) (URLData, error) {
+	urlData, err := GetSingleUrl(id)
+
+	previousPageHitCountString := strconv.Itoa(int(urlData.PageHits))
+	db, err := getNewPlanetScaleClient()
+	query := fmt.Sprintf("UPDATE %s SET %s = %s + 1 WHERE id = ?", "urls", "page_hits", previousPageHitCountString)
+	_, err = db.Exec(query, id)
+
+	if err != nil {
+		log.Println("IncrementSingleUrlPageHit() --> Failed to increment the page_hits field:", err)
+	} else {
+		urlData.PageHits = urlData.PageHits + 1
+	}
+
+	return urlData, err
+}
+
 func GetSingleUrlUnexpired(id string) (URLData, error) {
 	urlData := URLData{}
-	query := `SELECT * FROM urls WHERE id = ? AND self_destruct = '' OR self_destruct > ?`
+	query := "SELECT * FROM urls WHERE id = ? AND (self_destruct IS NULL OR self_destruct > ?) AND (max_page_hits = 0 OR max_page_hits > page_hits)"
 	db, err := getNewPlanetScaleClient()
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 
 	err = db.QueryRow(query, id, timeNow).Scan(
 		&urlData.ID,
-		&urlData.Destination,
 		&urlData.DateCreated,
-		&urlData.URL,
+		&urlData.Destination,
+		&urlData.MaxPageHits,
+		&urlData.PageHits,
+		&urlData.Password,
 		&urlData.SelfDestruct,
 		&urlData.SessionToken,
-		&urlData.Password,
+		&urlData.URL,
 	)
 	if err != nil {
 		log.Println("(GetSingleUrlUnexpired) db.Exec", err)
@@ -200,12 +226,14 @@ func GetAllUrlsBasedOnSessionToken(sessionToken string) ([]URLData, error) {
 		var urlData URLData
 		err := res.Scan(
 			&urlData.ID,
-			&urlData.Destination,
 			&urlData.DateCreated,
-			&urlData.URL,
+			&urlData.Destination,
+			&urlData.MaxPageHits,
+			&urlData.PageHits,
+			&urlData.Password,
 			&urlData.SelfDestruct,
 			&urlData.SessionToken,
-			&urlData.Password,
+			&urlData.URL,
 		)
 		if err != nil {
 			log.Print("(GetAllUrlsBasedOnSessionToken) res.Scan", err)
@@ -229,7 +257,17 @@ func GetAllExpiredUrls() ([]URLData, error) {
 	urls := []URLData{}
 	for res.Next() {
 		var urlData URLData
-		err := res.Scan(&urlData.ID, &urlData.Destination, &urlData.DateCreated, &urlData.URL, &urlData.SelfDestruct, &urlData.SessionToken)
+		err := res.Scan(
+			&urlData.ID,
+			&urlData.DateCreated,
+			&urlData.Destination,
+			&urlData.MaxPageHits,
+			&urlData.PageHits,
+			&urlData.Password,
+			&urlData.SelfDestruct,
+			&urlData.SessionToken,
+			&urlData.URL,
+		)
 		if err != nil {
 			log.Print("(GetAllExpiredUrls) res.Scan", err)
 		}
@@ -240,7 +278,7 @@ func GetAllExpiredUrls() ([]URLData, error) {
 }
 
 func DeleteFromDatabase(id string, sessionToken string) (bool, error) {
-	query := `DELETE FROM urls WHERE id = ? AND session_token = ?`
+	query := "DELETE FROM urls WHERE id = ? AND session_token = ?"
 	db, err := getNewPlanetScaleClient()
 	err = db.QueryRow(query, id, sessionToken).Err()
 	if err != nil {
@@ -253,7 +291,7 @@ func DeleteFromDatabase(id string, sessionToken string) (bool, error) {
 
 func DeleteAllExpiredDocuments() ([]string, error) {
 	db, err := getNewPlanetScaleClient()
-	query := "DELETE FROM urls WHERE self_destruct < ?"
+	query := "DELETE FROM urls WHERE self_destruct < ? OR max_page_hits > page_hits"
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	res, err := db.Query(query, timeNow)
 	defer res.Close()
@@ -266,12 +304,14 @@ func DeleteAllExpiredDocuments() ([]string, error) {
 		var urlData URLData
 		err := res.Scan(
 			&urlData.ID,
-			&urlData.Destination,
 			&urlData.DateCreated,
-			&urlData.URL,
+			&urlData.Destination,
+			&urlData.MaxPageHits,
+			&urlData.PageHits,
+			&urlData.Password,
 			&urlData.SelfDestruct,
 			&urlData.SessionToken,
-			&urlData.Password,
+			&urlData.URL,
 		)
 		if err != nil {
 			log.Print("(DeleteAllExpiredDocuments) res.Scan", err)
@@ -296,12 +336,17 @@ func checkIfUrlIdExists(urlId string) bool {
 	}
 }
 
-// CREATE TABLE urls(
-// 	id VARCHAR(20) NOT NULL,
-// 	destination VARCHAR(2048) NOT NULL,
-// 	date_created DATE NOT NULL,
-// 	url VARCHAR(2048) NOT NULL,
-// 	self_destruct DATE,
-// 	session_token VARCHAR(50)
-// 	PRIMARY KEY ( id )
-//  );
+// SELECT * FROM urls; --DELETE FROM urls;
+
+// CREATE TABLE IF NOT EXISTS urls (
+//     id VARCHAR(36) NOT NULL,
+//     date_created VARCHAR(20) NOT NULL,
+//     destination VARCHAR(2048) NOT NULL,
+//     max_page_hits INT,
+//     page_hits INT,
+//     password VARCHAR(255),
+//     self_destruct VARCHAR(255),
+//     session_token VARCHAR(255),
+//     url VARCHAR(2048) NOT NULL,
+//     PRIMARY KEY (id)
+// );

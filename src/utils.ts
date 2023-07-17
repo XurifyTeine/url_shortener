@@ -17,3 +17,13 @@ export const truncateText = (text: string, length: number) => {
   }
   return `${text.slice(0, length)}...`;
 };
+
+export const encodeObjectToQueryParams = (obj: Record<string, any>): string => {
+  const queryParams = Object.entries(obj)
+    .filter(([_key, value]) => value !== undefined)
+    .map(([key, value]) => {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+    })
+    .join("&");
+  return queryParams;
+};
